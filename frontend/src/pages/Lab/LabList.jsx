@@ -22,6 +22,12 @@ const STATUS_OPTIONS = [
   { value: "Completed", label: "Completed" },
 ];
 
+const formatDoctorName = (firstName, lastName) => {
+  const cleanFirst = String(firstName || "").replace(/^dr\.?\s*/i, "").trim();
+  const cleanLast = String(lastName || "").trim();
+  return `Dr. ${`${cleanFirst} ${cleanLast}`.trim()}`;
+};
+
 export default function LabList() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
@@ -131,7 +137,7 @@ export default function LabList() {
       render: (row) =>
         row.doctor ? (
           <span className="text-surface-700 font-medium">
-            Dr. {row.doctor.firstName} {row.doctor.lastName}
+            {formatDoctorName(row.doctor.firstName, row.doctor.lastName)}
           </span>
         ) : (
           <span className="text-surface-400">—</span>

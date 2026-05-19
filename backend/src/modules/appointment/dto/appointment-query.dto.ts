@@ -14,7 +14,7 @@ import { AppointmentStatus } from './create-appointment.dto';
 export type SortOrder = 'ASC' | 'DESC';
 
 export class AppointmentQueryDto {
-  /** Full-text search across patient name, doctor name, reason */
+  /** Full-text search across patient name and reason */
   @IsOptional()
   @IsString()
   search?: string;
@@ -47,7 +47,7 @@ export class AppointmentQueryDto {
 
   /** Field to sort by */
   @IsOptional()
-  @IsIn(['appointmentDate', 'doctorName', 'status', 'createdAt', 'appointmentId'])
+  @IsIn(['appointmentDate', 'status', 'createdAt', 'appointmentId'])
   sortBy?: string;
 
   /** Sort direction */

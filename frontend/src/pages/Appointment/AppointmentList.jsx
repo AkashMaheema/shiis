@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Plus, Search, Trash2, Edit3, CalendarCheck } from "lucide-react";
 import { toast } from "react-toastify";
 import appointmentService from "../../api/services/appointmentService";
-import patientService from "../../api/services/patientService";
+import labService from "../../api/services/labService";
 import DataTable from "../../components/common/DataTable";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
@@ -18,6 +18,12 @@ const STATUS_OPTIONS = [
   { value: "No Show", label: "No Show" },
 ];
 
+const formatDoctorName = (firstName, lastName) => {
+  const cleanFirst = String(firstName || "").replace(/^dr\.?\s*/i, "").trim();
+  const cleanLast = String(lastName || "").trim();
+  return `Dr. ${`${cleanFirst} ${cleanLast}`.trim()}`;
+};
+
 export default function AppointmentList() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
@@ -26,6 +32,7 @@ export default function AppointmentList() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [doctorMap, setDoctorMap] = useState({});
   const [deleteModal, setDeleteModal] = useState({
     open: false,
     appointment: null,
@@ -55,6 +62,21 @@ export default function AppointmentList() {
     const debounce = setTimeout(fetchAppointments, search ? 400 : 0);
     return () => clearTimeout(debounce);
   }, [fetchAppointments, search]);
+
+  useEffect(() => {
+    labService
+      .getDoctors()
+      .then((rows) => {
+        const map = {};
+        (rows || []).forEach((d) => {
+          map[d.doctorId] = formatDoctorName(d.firstName, d.lastName);
+        });
+        setDoctorMap(map);
+      })
+      .catch(() => {
+        setDoctorMap({});
+      });
+  }, []);
 
   const handleDelete = async () => {
     if (!deleteModal.appointment) return;
@@ -107,11 +129,11 @@ export default function AppointmentList() {
       },
     },
     {
-      key: "doctorName",
+      key: "doctorId",
       label: "Doctor",
       render: (row) => (
         <span className="text-surface-700 font-medium">
-          {row.doctorName || "—"}
+          {row.doctorId ? doctorMap[row.doctorId] || `Doctor #${row.doctorId}` : "—"}
         </span>
       ),
     },
@@ -219,7 +241,7 @@ export default function AppointmentList() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
           <input
             type="text"
-            placeholder="Search by patient, doctor, or reason..."
+            placeholder="Search by patient or reason..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);

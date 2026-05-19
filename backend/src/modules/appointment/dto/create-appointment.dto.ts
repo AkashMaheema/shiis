@@ -20,10 +20,9 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   patientId: number;
 
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  @MaxLength(100)
-  doctorName: string;
+  doctorId: number;
 
   @IsDateString()
   @IsNotEmpty()

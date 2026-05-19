@@ -17,12 +17,12 @@ export class Appointment {
   @Column({ name: 'patient_id', type: 'int' })
   patientId: number;
 
+  @Column({ name: 'doctor_id', type: 'int' })
+  doctorId: number;
+
   @ManyToOne(() => Patient, { eager: true })
   @JoinColumn({ name: 'patient_id' })
   patient: Patient;
-
-  @Column({ name: 'doctor_name', type: 'varchar', length: 100, nullable: true })
-  doctorName: string;
 
   @Column({ name: 'appointment_date', type: 'datetime' })
   appointmentDate: Date;

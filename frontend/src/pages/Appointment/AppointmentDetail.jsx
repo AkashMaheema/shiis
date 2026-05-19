@@ -17,6 +17,13 @@ import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import StatusBadge from "../../components/common/StatusBadge";
 import { toast } from "react-toastify";
+import labService from "../../api/services/labService";
+
+const formatDoctorName = (firstName, lastName) => {
+  const cleanFirst = String(firstName || "").replace(/^dr\.?\s*/i, "").trim();
+  const cleanLast = String(lastName || "").trim();
+  return `Dr. ${`${cleanFirst} ${cleanLast}`.trim()}`;
+};
 
 function DetailRow({ icon, label, value }) {
   return (
@@ -40,6 +47,7 @@ export default function AppointmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [appointment, setAppointment] = useState(null);
+  const [doctorMap, setDoctorMap] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,6 +60,21 @@ export default function AppointmentDetail() {
       })
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  useEffect(() => {
+    labService
+      .getDoctors()
+      .then((rows) => {
+        const map = {};
+        (rows || []).forEach((d) => {
+          map[d.doctorId] = formatDoctorName(d.firstName, d.lastName);
+        });
+        setDoctorMap(map);
+      })
+      .catch(() => {
+        setDoctorMap({});
+      });
+  }, []);
 
   if (loading) return <Loader text="Loading appointment details..." />;
   if (!appointment) return null;
@@ -71,6 +94,15 @@ export default function AppointmentDetail() {
         year: "numeric",
       })
     : null;
+  const createdOnSource =
+    appointment.createdAt || appointment.updatedAt || appointment.appointmentDate;
+  const createdOnFormatted = createdOnSource
+    ? new Date(createdOnSource).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "Not available";
 
   const statusMap = {
     Scheduled: "booked",
@@ -79,6 +111,10 @@ export default function AppointmentDetail() {
     Cancelled: "cancelled",
     "No Show": "inactive",
   };
+
+  const doctorName = appointment.doctorId
+    ? doctorMap[appointment.doctorId] || `Doctor #${appointment.doctorId}`
+    : null;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -116,7 +152,7 @@ export default function AppointmentDetail() {
               <div className="flex items-center gap-3 mt-1">
                 <span className="flex items-center gap-1.5 text-sm text-surface-500">
                   <Stethoscope className="w-4 h-4 text-accent-500" />
-                  {appointment.doctorName || "Not assigned"}
+                  {doctorName || "Not assigned"}
                 </span>
                 {patient?.phone && (
                   <>
@@ -154,7 +190,7 @@ export default function AppointmentDetail() {
           <DetailRow
             icon={<Stethoscope className="w-4 h-4 text-primary-500" />}
             label="Doctor"
-            value={appointment.doctorName}
+            value={doctorName}
           />
           <DetailRow
             icon={<Calendar className="w-4 h-4 text-primary-500" />}
@@ -184,15 +220,7 @@ export default function AppointmentDetail() {
           <DetailRow
             icon={<Calendar className="w-4 h-4 text-primary-500" />}
             label="Created On"
-            value={
-              appointment.createdAt
-                ? new Date(appointment.createdAt).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })
-                : null
-            }
+            value={createdOnFormatted}
           />
         </div>
       </div>

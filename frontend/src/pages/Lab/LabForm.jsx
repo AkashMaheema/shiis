@@ -15,6 +15,12 @@ const initialForm = {
   requestDate: "",
 };
 
+const formatDoctorName = (firstName, lastName) => {
+  const cleanFirst = String(firstName || "").replace(/^dr\.?\s*/i, "").trim();
+  const cleanLast = String(lastName || "").trim();
+  return `Dr. ${`${cleanFirst} ${cleanLast}`.trim()}`;
+};
+
 export default function LabForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -122,7 +128,7 @@ export default function LabForm() {
   }));
   const doctorOptions = doctors.map((d) => ({
     value: d.doctorId,
-    label: `Dr. ${d.firstName} ${d.lastName} (#${d.doctorId})`,
+    label: `${formatDoctorName(d.firstName, d.lastName)} (#${d.doctorId})`,
   }));
   const testOptions = tests.map((t) => ({
     value: t.testId,

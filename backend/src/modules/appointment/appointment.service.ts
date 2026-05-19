@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,7 +16,6 @@ import { PaginatedResponse } from '../../common/dto/paginated-response.dto';
 // Column name map: DTO field → entity property alias used in QueryBuilder
 const SORT_COLUMN_MAP: Record<string, string> = {
   appointmentDate: 'a.appointmentDate',
-  doctorName: 'a.doctorName',
   status: 'a.status',
   createdAt: 'a.createdAt',
   appointmentId: 'a.appointmentId',
@@ -24,6 +24,30 @@ const SORT_COLUMN_MAP: Record<string, string> = {
 @Injectable()
 export class AppointmentService {
   private readonly logger = new Logger(AppointmentService.name);
+
+  private validateAppointmentDateNotPast(
+    appointmentDate?: string | Date,
+    field = 'appointmentDate',
+  ): void {
+    if (!appointmentDate) return;
+
+    const candidate = new Date(appointmentDate);
+    if (Number.isNaN(candidate.getTime())) {
+      throw new BadRequestException(`${field} must be a valid date`);
+    }
+
+    const candidateDay = new Date(
+      candidate.getFullYear(),
+      candidate.getMonth(),
+      candidate.getDate(),
+    );
+    const today = new Date();
+    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    if (candidateDay < todayDay) {
+      throw new BadRequestException(`${field} cannot be in the past`);
+    }
+  }
 
   constructor(
     @InjectRepository(Appointment)
@@ -45,7 +69,7 @@ export class AppointmentService {
   ): Record<string, { from: unknown; to: unknown }> | null {
     const tracked: (keyof Appointment)[] = [
       'patientId',
-      'doctorName',
+      'doctorId',
       'appointmentDate',
       'appointmentTime',
       'status',
@@ -127,7 +151,7 @@ export class AppointmentService {
     // Full-text search
     if (search?.trim()) {
       qb.andWhere(
-        `(a.doctorName LIKE :q OR a.reason LIKE :q OR p.firstName LIKE :q OR p.lastName LIKE :q)`,
+        `(a.reason LIKE :q OR p.firstName LIKE :q OR p.lastName LIKE :q)`,
         { q: `%${search.trim()}%` },
       );
     }
@@ -183,9 +207,14 @@ export class AppointmentService {
    * Create a new appointment with audit.
    */
   async create(dto: CreateAppointmentDto, actorId?: number): Promise<Appointment> {
+    this.validateAppointmentDateNotPast(dto.appointmentDate);
+    const now = new Date();
+
     const appointment = this.appointmentRepo.create({
       ...dto,
       status: dto.status || 'Scheduled',
+      createdAt: now,
+      updatedAt: now,
       createdBy: actorId ?? null,
       updatedBy: actorId ?? null,
       isDeleted: false,
@@ -212,10 +241,13 @@ export class AppointmentService {
     dto: UpdateAppointmentDto,
     actorId?: number,
   ): Promise<Appointment> {
+    this.validateAppointmentDateNotPast(dto.appointmentDate);
+
     const appointment = await this.findOne(id);
 
     const before = { ...appointment };
     Object.assign(appointment, dto);
+    appointment.updatedAt = new Date();
     appointment.updatedBy = actorId ?? null;
 
     const updated = await this.appointmentRepo.save(appointment);

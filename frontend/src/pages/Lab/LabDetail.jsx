@@ -19,6 +19,12 @@ import StatusBadge from "../../components/common/StatusBadge";
 import Modal from "../../components/common/Modal";
 import { toast } from "react-toastify";
 
+const formatDoctorName = (firstName, lastName) => {
+  const cleanFirst = String(firstName || "").replace(/^dr\.?\s*/i, "").trim();
+  const cleanLast = String(lastName || "").trim();
+  return `Dr. ${`${cleanFirst} ${cleanLast}`.trim()}`;
+};
+
 function DetailRow({ icon, label, value }) {
   return (
     <div className="flex items-start gap-3 py-3 border-b border-surface-200/60 last:border-0">
@@ -175,7 +181,7 @@ export default function LabDetail() {
                     <span className="text-surface-300">·</span>
                     <span className="flex items-center gap-1.5 text-sm text-surface-500">
                       <Stethoscope className="w-4 h-4 text-accent-500" />
-                      Dr. {doctor.firstName} {doctor.lastName}
+                      {formatDoctorName(doctor.firstName, doctor.lastName)}
                     </span>
                   </>
                 )}
@@ -208,7 +214,7 @@ export default function LabDetail() {
             label="Referring Doctor"
             value={
               doctor
-                ? `Dr. ${doctor.firstName} ${doctor.lastName} (#${doctor.doctorId})`
+                ? `${formatDoctorName(doctor.firstName, doctor.lastName)} (#${doctor.doctorId})`
                 : null
             }
           />

@@ -4,6 +4,7 @@ import { Save, ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import appointmentService from "../../api/services/appointmentService";
 import patientService from "../../api/services/patientService";
+import labService from "../../api/services/labService";
 import FormInput from "../../components/common/FormInput";
 import FormSelect from "../../components/common/FormSelect";
 import Button from "../../components/common/Button";
@@ -18,12 +19,26 @@ const statusOptions = [
 
 const initialForm = {
   patientId: "",
-  doctorName: "",
+  doctorId: "",
   appointmentDate: "",
   appointmentTime: "",
   status: "Scheduled",
   reason: "",
   notes: "",
+};
+
+const todayDateString = () => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const formatDoctorName = (firstName, lastName) => {
+  const cleanFirst = String(firstName || "").replace(/^dr\.?\s*/i, "").trim();
+  const cleanLast = String(lastName || "").trim();
+  return `Dr. ${`${cleanFirst} ${cleanLast}`.trim()}`;
 };
 
 export default function AppointmentForm() {
@@ -37,6 +52,8 @@ export default function AppointmentForm() {
   const [fetching, setFetching] = useState(false);
   const [patients, setPatients] = useState([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
+  const [doctors, setDoctors] = useState([]);
+  const [loadingDoctors, setLoadingDoctors] = useState(true);
 
   // Load patients for dropdown
   useEffect(() => {
@@ -52,6 +69,20 @@ export default function AppointmentForm() {
       .finally(() => setLoadingPatients(false));
   }, []);
 
+  // Load doctors for dropdown
+  useEffect(() => {
+    setLoadingDoctors(true);
+    labService
+      .getDoctors()
+      .then((res) => {
+        setDoctors(Array.isArray(res) ? res : []);
+      })
+      .catch(() => {
+        toast.error("Failed to load doctor list.");
+      })
+      .finally(() => setLoadingDoctors(false));
+  }, []);
+
   // Load existing appointment for edit
   useEffect(() => {
     if (isEdit) {
@@ -61,7 +92,7 @@ export default function AppointmentForm() {
         .then((appt) => {
           setForm({
             patientId: appt.patientId || "",
-            doctorName: appt.doctorName || "",
+            doctorId: appt.doctorId || "",
             appointmentDate: appt.appointmentDate
               ? appt.appointmentDate.split("T")[0]
               : "",
@@ -88,10 +119,13 @@ export default function AppointmentForm() {
 
   const validate = () => {
     const errs = {};
+    const today = todayDateString();
     if (!form.patientId) errs.patientId = "Patient is required";
-    if (!form.doctorName.trim()) errs.doctorName = "Doctor name is required";
+    if (!form.doctorId) errs.doctorId = "Doctor is required";
     if (!form.appointmentDate)
       errs.appointmentDate = "Appointment date is required";
+    else if (form.appointmentDate < today)
+      errs.appointmentDate = "Appointment date cannot be in the past";
     if (!form.appointmentTime)
       errs.appointmentTime = "Appointment time is required";
     setErrors(errs);
@@ -107,6 +141,7 @@ export default function AppointmentForm() {
       const payload = {
         ...form,
         patientId: Number(form.patientId),
+        doctorId: Number(form.doctorId),
       };
 
       if (isEdit) {
@@ -132,6 +167,14 @@ export default function AppointmentForm() {
     value: p.patientId,
     label: `${p.firstName} ${p.lastName} (#${p.patientId})`,
   }));
+
+  const doctorOptions = doctors.map((d) => {
+    const doctorLabel = formatDoctorName(d.firstName, d.lastName);
+    return {
+      value: d.doctorId,
+      label: `${doctorLabel} (#${d.doctorId})`,
+    };
+  });
 
   if (fetching) return <Loader text="Loading appointment data..." />;
 
@@ -171,14 +214,15 @@ export default function AppointmentForm() {
             required
             placeholder={loadingPatients ? "Loading patients..." : "Select patient..."}
           />
-          <FormInput
-            label="Doctor Name"
-            name="doctorName"
-            value={form.doctorName}
+          <FormSelect
+            label="Doctor"
+            name="doctorId"
+            value={form.doctorId}
             onChange={handleChange}
-            error={errors.doctorName}
+            options={doctorOptions}
+            error={errors.doctorId}
             required
-            placeholder="Dr. John Smith"
+            placeholder={loadingDoctors ? "Loading doctors..." : "Select doctor..."}
           />
         </div>
 
@@ -192,6 +236,7 @@ export default function AppointmentForm() {
             onChange={handleChange}
             error={errors.appointmentDate}
             required
+            min={todayDateString()}
           />
           <FormInput
             label="Appointment Time"
