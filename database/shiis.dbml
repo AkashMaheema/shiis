@@ -1,0 +1,107 @@
+Table Role {
+  role_id int [pk, increment]
+  role_name varchar(100)
+}
+
+Table User {
+  user_id int [pk, increment]
+  username varchar(100)
+  password varchar(255)
+  role_id int
+}
+
+Table Patient {
+  patient_id int [pk, increment]
+  first_name varchar(50) [not null]
+  last_name varchar(50) [not null]
+  dob date [not null]
+  gender varchar(10)
+  phone varchar(15)
+  email varchar(100)
+  address varchar(255)
+  is_deleted bit [not null, default: 0]
+  deleted_at datetime
+  deleted_by int
+  created_at datetime
+  updated_at datetime
+  created_by int
+  updated_by int
+}
+
+Table PatientAudit {
+  audit_id int [pk, increment]
+  patient_id int [not null]
+  changed_by int
+  action varchar(10) [not null]
+  snapshot nvarchar(max) [not null]
+  diff nvarchar(max)
+  changed_at datetime [not null]
+}
+
+Table Doctor {
+  doctor_id int [pk, increment]
+  first_name varchar(100)
+  last_name varchar(100)
+  phone varchar(25)
+  email varchar(100)
+}
+
+Table Appointment {
+  appointment_id int [pk, increment]
+  patient_id int [not null]
+  doctor_id int [not null]
+  appointment_date datetime [not null]
+  appointment_time varchar(10)
+  status varchar(20) [not null, default: 'Scheduled']
+  reason varchar(255)
+  notes nvarchar(max)
+  is_deleted bit [not null, default: 0]
+  deleted_at datetime
+  deleted_by int
+  created_at datetime
+  updated_at datetime
+  created_by int
+  updated_by int
+}
+
+Table AppointmentAudit {
+  audit_id int [pk, increment]
+  appointment_id int [not null]
+  changed_by int
+  action varchar(10) [not null]
+  snapshot nvarchar(max) [not null]
+  diff nvarchar(max)
+  changed_at datetime [not null]
+}
+
+Table Lab_Test {
+  test_id int [pk, increment]
+  test_name varchar(100)
+  price decimal(18,2)
+}
+
+Table Lab_Request {
+  request_id int [pk, increment]
+  patient_id int
+  doctor_id int
+  test_id int
+  request_date datetime
+}
+
+Table Lab_Result {
+  result_id int [pk, increment]
+  request_id int
+  result_details varchar(255)
+  result_date datetime
+}
+
+Ref: User.role_id > Role.role_id
+Ref: Appointment.patient_id > Patient.patient_id
+Ref: Appointment.doctor_id > Doctor.doctor_id
+Ref: PatientAudit.patient_id > Patient.patient_id
+Ref: AppointmentAudit.appointment_id > Appointment.appointment_id
+Ref: Lab_Request.patient_id > Patient.patient_id
+Ref: Lab_Request.doctor_id > Doctor.doctor_id
+Ref: Lab_Request.test_id > Lab_Test.test_id
+Ref: Lab_Result.request_id - Lab_Request.request_id
+

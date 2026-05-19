@@ -5,6 +5,10 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { UserEntity } from './entities/user.entity';
 
+function isBcryptHash(value: string): boolean {
+  return /^\$2[aby]\$/.test(value);
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,7 +30,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    let isMatch = false;
+
+    if (isBcryptHash(user.password)) {
+      isMatch = await bcrypt.compare(password, user.password);
+    } else {
+      // Legacy support: allow plain-text password once, then upgrade to bcrypt.
+      isMatch = user.password === password;
+      if (isMatch) {
+        user.password = await bcrypt.hash(password, 12);
+        await this.userRepository.save(user);
+      }
+    }
 
     if (!isMatch) {
       throw new UnauthorizedException('Invalid username or password');

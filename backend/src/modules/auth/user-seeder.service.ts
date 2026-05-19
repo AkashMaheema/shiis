@@ -8,15 +8,25 @@ import { UserEntity } from './entities/user.entity';
 const SALT_ROUNDS = 12;
 
 const DEFAULT_USERS = [
-  { username: 'admin', password: 'admin123', roleName: 'admin' },
-  { username: 'doctor', password: 'doctor123', roleName: 'doctor' },
-  { username: 'lab', password: 'lab123', roleName: 'lab' },
+  { username: 'admin', password: 'Admin@123', roleName: 'Admin' },
+  { username: 'doctor01', password: 'Doctor@123', roleName: 'Doctor' },
+  { username: 'nurse01', password: 'Nurse@123', roleName: 'Nurse' },
+  { username: 'pharma01', password: 'Pharma@123', roleName: 'Pharmacist' },
+  { username: 'lab01', password: 'Lab@123', roleName: 'Lab Staff' },
+  { username: 'recep01', password: 'Reception@123', roleName: 'Receptionist' },
+  { username: 'acc01', password: 'Account@123', roleName: 'Accountant' },
+  {
+    username: 'inventory01',
+    password: 'Inventory@123',
+    roleName: 'Inventory Manager',
+  },
+  {
+    username: 'supplier01',
+    password: 'Supplier@123',
+    roleName: 'Supplier Manager',
+  },
+  { username: 'manager01', password: 'Manager@123', roleName: 'Manager' },
 ];
-
-/** bcrypt hashes always start with $2b$ or $2a$ */
-function isHashed(password: string | null): boolean {
-  return typeof password === 'string' && /^\$2[ab]\$/.test(password);
-}
 
 @Injectable()
 export class UserSeederService implements OnModuleInit {
@@ -25,31 +35,52 @@ export class UserSeederService implements OnModuleInit {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
   ) {}
 
-  async onModuleInit() {
-    const existingUsers = await this.userRepository.count();
+  async onModuleInit(): Promise<void> {
+    const existingUsersCount = await this.userRepository.count();
 
-    if (existingUsers === 0) {
-      // Fresh DB — seed all default users with hashed passwords
-      await this.seedFresh();
-    } else {
-      // DB already has users — re-hash any that still have plain-text passwords
-      await this.rehashPlainPasswords();
+    if (existingUsersCount > 0) {
+      this.logger.log(
+        `User seeding skipped: found ${existingUsersCount} existing user(s)`,
+      );
+      return;
+    }
+
+    await this.seedRolesIfMissing();
+    await this.seedDefaultUsers();
+  }
+
+  private async seedRolesIfMissing(): Promise<void> {
+    for (const defaultUser of DEFAULT_USERS) {
+      const existingRole = await this.roleRepository
+        .createQueryBuilder('role')
+        .where('LOWER(role.roleName) = LOWER(:roleName)', {
+          roleName: defaultUser.roleName,
+        })
+        .orWhere('LOWER(role.role_name) = LOWER(:roleName)', {
+          roleName: defaultUser.roleName,
+        })
+        .getOne()
+        .catch(() => null);
+
+      if (existingRole) continue;
+
+      const role = this.roleRepository.create({
+        roleName: defaultUser.roleName,
+      } as Partial<RoleEntity>);
+
+      await this.roleRepository.save(role);
+      this.logger.log(`Created missing role: ${defaultUser.roleName}`);
     }
   }
 
-  // ── Fresh seed ────────────────────────────────────────────────────────────
-
-  private async seedFresh(): Promise<void> {
-    const seededUsers: UserEntity[] = [];
-
+  private async seedDefaultUsers(): Promise<void> {
     for (const defaultUser of DEFAULT_USERS) {
-      const role = await this.roleRepository.findOne({
-        where: { roleName: defaultUser.roleName },
-      });
+      const role = await this.findRoleByName(defaultUser.roleName);
 
       if (!role) {
         this.logger.warn(
@@ -63,67 +94,23 @@ export class UserSeederService implements OnModuleInit {
         SALT_ROUNDS,
       );
 
-      seededUsers.push(
-        this.userRepository.create({
-          username: defaultUser.username,
-          password: hashedPassword,
-          role,
-        }),
-      );
+      const user = this.userRepository.create({
+        username: defaultUser.username,
+        password: hashedPassword,
+        role,
+      });
+
+      await this.userRepository.save(user);
+      this.logger.log(`Seeded default user: ${defaultUser.username}`);
     }
-
-    if (seededUsers.length === 0) return;
-
-    await this.userRepository.save(seededUsers);
-    this.logger.log(
-      `Seeded ${seededUsers.length} default users with hashed passwords`,
-    );
   }
 
-  // ── Re-hash plain-text passwords ──────────────────────────────────────────
-
-  private async rehashPlainPasswords(): Promise<void> {
-    const allUsers = await this.userRepository.find();
-    const toUpdate: UserEntity[] = [];
-
-    for (const user of allUsers) {
-      if (isHashed(user.password)) {
-        // Already hashed — skip
-        continue;
-      }
-
-      // Find the known plain-text password for this username
-      const defaultUser = DEFAULT_USERS.find(
-        (u) => u.username === user.username,
-      );
-
-      if (!defaultUser) {
-        // Unknown user with plain-text password — hash whatever is stored
-        if (user.password) {
-          this.logger.warn(
-            `User "${user.username}" has a plain-text password — re-hashing`,
-          );
-          user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
-          toUpdate.push(user);
-        }
-        continue;
-      }
-
-      this.logger.log(
-        `Re-hashing plain-text password for user "${user.username}"`,
-      );
-      user.password = await bcrypt.hash(defaultUser.password, SALT_ROUNDS);
-      toUpdate.push(user);
-    }
-
-    if (toUpdate.length === 0) {
-      this.logger.log('All user passwords are already hashed — nothing to do');
-      return;
-    }
-
-    await this.userRepository.save(toUpdate);
-    this.logger.log(
-      `Re-hashed passwords for ${toUpdate.length} user(s): ${toUpdate.map((u) => u.username).join(', ')}`,
-    );
+  private async findRoleByName(roleName: string): Promise<RoleEntity | null> {
+    return this.roleRepository
+      .createQueryBuilder('role')
+      .where('LOWER(role.roleName) = LOWER(:roleName)', { roleName })
+      .orWhere('LOWER(role.role_name) = LOWER(:roleName)', { roleName })
+      .getOne()
+      .catch(() => null);
   }
 }
