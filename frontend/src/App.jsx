@@ -16,6 +16,9 @@ import LabList from "./pages/Lab/LabList";
 import LabForm from "./pages/Lab/LabForm";
 import LabDetail from "./pages/Lab/LabDetail";
 import LabTestCatalog from "./pages/Lab/LabTestCatalog";
+import MedicineList from "./pages/Medicine/MedicineList";
+import MedicineForm from "./pages/Medicine/MedicineForm";
+import MedicineDetail from "./pages/Medicine/MedicineDetail";
 import { useAuth } from "./contexts/useAuth";
 
 function ComingSoon({ name }) {
@@ -82,7 +85,19 @@ export default function App() {
             />
             <Route
               path="/inventory"
-              element={<ComingSoon name="Inventory & Medicine" />}
+              element={<MedicineList />}
+            />
+            <Route
+              path="/inventory/new"
+              element={<MedicineForm />}
+            />
+            <Route
+              path="/inventory/:id"
+              element={<MedicineDetail />}
+            />
+            <Route
+              path="/inventory/:id/edit"
+              element={<MedicineForm />}
             />
             <Route
               path="/suppliers"
