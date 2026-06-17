@@ -9,30 +9,36 @@ import {
   IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Gender } from './create-patient.dto';
+import { AppointmentStatus } from './create-appointment.dto';
 
 export type SortOrder = 'ASC' | 'DESC';
 
-export class PatientQueryDto {
-  /** Full-text search across first name, last name, email, phone */
+export class AppointmentQueryDto {
+  /** Full-text search across patient name and reason */
   @IsOptional()
   @IsString()
   search?: string;
 
-  /** Filter by gender */
+  /** Filter by status */
   @IsOptional()
-  @IsEnum(Gender)
-  gender?: Gender;
+  @IsEnum(AppointmentStatus)
+  status?: AppointmentStatus;
 
-  /** Filter patients born on or after this date (YYYY-MM-DD) */
+  /** Filter appointments on or after this date (YYYY-MM-DD) */
   @IsOptional()
   @IsDateString()
-  dobFrom?: string;
+  dateFrom?: string;
 
-  /** Filter patients born on or before this date (YYYY-MM-DD) */
+  /** Filter appointments on or before this date (YYYY-MM-DD) */
   @IsOptional()
   @IsDateString()
-  dobTo?: string;
+  dateTo?: string;
+
+  /** Filter by specific patient */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  patientId?: number;
 
   /** Include soft-deleted records (admin use) */
   @IsOptional()
@@ -41,7 +47,7 @@ export class PatientQueryDto {
 
   /** Field to sort by */
   @IsOptional()
-  @IsIn(['firstName', 'lastName', 'dob', 'createdAt', 'patientId'])
+  @IsIn(['appointmentDate', 'status', 'createdAt', 'appointmentId'])
   sortBy?: string;
 
   /** Sort direction */
