@@ -10,27 +10,25 @@ export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-  ) {}
+  ) { }
 
   async login(loginDto: LoginDto) {
     const username = loginDto.username.trim();
+    const password = loginDto.password;
 
-    // Fetch by username only — never compare plain passwords in a query
     const user = await this.userRepository.findOne({
-      where: { username },
+      where: {
+        username,
+      },
     });
 
     if (!user || !user.password) {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    // Constant-time bcrypt comparison
-    const passwordMatch = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!passwordMatch) {
+    if (!isMatch) {
       throw new UnauthorizedException('Invalid username or password');
     }
 
