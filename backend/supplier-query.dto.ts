@@ -1,38 +1,30 @@
 import {
   IsOptional,
   IsString,
-  IsEnum,
-  IsDateString,
   IsInt,
   Min,
   Max,
   IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Gender } from './create-patient.dto';
 
 export type SortOrder = 'ASC' | 'DESC';
 
-export class PatientQueryDto {
-  /** Full-text search across first name, last name, email, phone */
+export class SupplierQueryDto {
+  /** Full-text search across name, contact person, email, phone */
   @IsOptional()
   @IsString()
   search?: string;
 
-  /** Filter by gender */
+  /** Filter by city */
   @IsOptional()
-  @IsEnum(Gender)
-  gender?: Gender;
+  @IsString()
+  city?: string;
 
-  /** Filter patients born on or after this date (YYYY-MM-DD) */
+  /** Filter by country */
   @IsOptional()
-  @IsDateString()
-  dobFrom?: string;
-
-  /** Filter patients born on or before this date (YYYY-MM-DD) */
-  @IsOptional()
-  @IsDateString()
-  dobTo?: string;
+  @IsString()
+  country?: string;
 
   /** Include soft-deleted records (admin use) */
   @IsOptional()
@@ -41,7 +33,7 @@ export class PatientQueryDto {
 
   /** Field to sort by */
   @IsOptional()
-  @IsIn(['firstName', 'lastName', 'dob', 'createdAt', 'patientId'])
+  @IsIn(['name', 'city', 'country', 'createdAt', 'supplierId'])
   sortBy?: string;
 
   /** Sort direction */
@@ -61,6 +53,6 @@ export class PatientQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(1000)
+  @Max(100)
   limit?: number = 20;
 }

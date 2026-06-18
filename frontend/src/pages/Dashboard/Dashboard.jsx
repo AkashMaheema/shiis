@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Users,
   Stethoscope,
@@ -8,8 +9,9 @@ import {
   DollarSign,
   FlaskConical,
 } from "lucide-react";
+import labService from "../../api/services/labService";
 
-const stats = [
+const baseStats = [
   {
     label: "Total Patients",
     value: "—",
@@ -85,6 +87,19 @@ const stats = [
 ];
 
 export default function Dashboard() {
+  const [pendingLab, setPendingLab] = useState("—");
+
+  useEffect(() => {
+    labService
+      .getStats()
+      .then((s) => setPendingLab(String(s.pendingRequests ?? "—")))
+      .catch(() => setPendingLab("—"));
+  }, []);
+
+  const stats = baseStats.map((s) =>
+    s.label === "Pending Lab Tests" ? { ...s, value: pendingLab } : s,
+  );
+
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
