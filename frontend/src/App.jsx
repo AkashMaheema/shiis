@@ -10,6 +10,9 @@ import PatientDetail from "./pages/Patient/PatientDetail";
 import UserList from "./pages/User/UserList";
 import UserForm from "./pages/User/UserForm";
 import { useAuth } from "./contexts/useAuth";
+import PrescriptionList from "./pages/Prescription/PrescriptionList";
+import PrescriptionForm from "./pages/Prescription/PrescriptionForm";
+import PrescriptionDetail from "./pages/Prescription/PrescriptionDetail";
 
 function ComingSoon({ name }) {
   return (
@@ -57,10 +60,10 @@ export default function App() {
               path="/appointments"
               element={<ComingSoon name="Appointment System" />}
             />
-            <Route
-              path="/prescriptions"
-              element={<ComingSoon name="Prescription System" />}
-            />
+            <Route path="/prescriptions" element={<PrescriptionList />} />
+            <Route path="/prescriptions/new" element={<PrescriptionForm />} />
+            <Route path="/prescriptions/:id" element={<PrescriptionDetail />} />
+            <Route path="/prescriptions/:id/edit" element={<PrescriptionForm />} />
             <Route
               path="/inventory"
               element={<ComingSoon name="Inventory & Medicine" />}
