@@ -43,7 +43,7 @@ export default function DataTable({
             ) : (
               data.map((row, idx) => (
                 <tr
-                  key={row.id || row.patientId || row.appointmentId || idx}
+                  key={row.id || row.patientId || row.appointmentId || row.medicineId || idx}
                   onClick={() => onRowClick?.(row)}
                   className={`transition-colors duration-150
                     ${onRowClick ? "cursor-pointer hover:bg-primary-50/60" : ""}
