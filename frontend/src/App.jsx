@@ -23,6 +23,9 @@ import StockInList from "./pages/StockIn/StockInList";
 import StockInForm from "./pages/StockIn/StockInForm";
 import StockInDetail from "./pages/StockIn/StockInDetail";
 import StockInReceive from "./pages/StockIn/StockInReceive";
+import MedicineList from "./pages/Medicine/MedicineList";
+import MedicineForm from "./pages/Medicine/MedicineForm";
+import MedicineDetail from "./pages/Medicine/MedicineDetail";
 import { useAuth } from "./contexts/useAuth";
 import PrescriptionList from "./pages/Prescription/PrescriptionList";
 import PrescriptionForm from "./pages/Prescription/PrescriptionForm";
@@ -84,10 +87,10 @@ export default function App() {
             <Route path="/prescriptions/new" element={<PrescriptionForm />} />
             <Route path="/prescriptions/:id" element={<PrescriptionDetail />} />
             <Route path="/prescriptions/:id/edit" element={<PrescriptionForm />} />
-            <Route
-              path="/inventory"
-              element={<ComingSoon name="Inventory & Medicine" />}
-            />
+            <Route path="/inventory" element={<MedicineList />} />
+            <Route path="/inventory/new" element={<MedicineForm />} />
+            <Route path="/inventory/:id" element={<MedicineDetail />} />
+            <Route path="/inventory/:id/edit" element={<MedicineForm />} />
             <Route path="/suppliers" element={<SupplierList />} />
             <Route path="/suppliers/new" element={<SupplierForm />} />
             <Route path="/suppliers/:id" element={<SupplierDetail />} />
@@ -97,19 +100,15 @@ export default function App() {
             <Route path="/stock-in/:id" element={<StockInDetail />} />
             <Route path="/stock-in/:id/edit" element={<StockInForm />} />
             <Route path="/stock-in/:id/receive" element={<StockInReceive />} />
-            <Route
-              path="/billing"
-              element={<ComingSoon name="Billing System" />}
-            />
+            <Route path="/billing" element={<BillingList />} />
+            <Route path="/billing/new" element={<BillingForm />} />
+            <Route path="/billing/:id" element={<BillingDetail />} />
+            <Route path="/billing/:id/edit" element={<BillingForm />} />
             <Route path="/lab" element={<LabList />} />
             <Route path="/lab/new" element={<LabForm />} />
             <Route path="/lab/tests" element={<LabTestCatalog />} />
             <Route path="/lab/:id" element={<LabDetail />} />
             <Route path="/lab/:id/edit" element={<LabForm />} />
-             <Route path="/billing" element={<BillingList />} />
-                        <Route path="/billing/new" element={<BillingForm />} />
-                        <Route path="/billing/:id" element={<BillingDetail />} />
-                        <Route path="/billing/:id/edit" element={<BillingForm />} />
           </Route>
         </Route>
 
