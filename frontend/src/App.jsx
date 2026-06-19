@@ -63,25 +63,19 @@ export default function App() {
               path="/doctors"
               element={<ComingSoon name="Doctor Management" />}
             />
-            <Route
-              path="/appointments"
-              element={<AppointmentList />}
-            />
-            <Route
-              path="/appointments/new"
-              element={<AppointmentForm />}
-            />
-            <Route
-              path="/appointments/:id"
-              element={<AppointmentDetail />}
-            />
+            <Route path="/appointments" element={<AppointmentList />} />
+            <Route path="/appointments/new" element={<AppointmentForm />} />
+            <Route path="/appointments/:id" element={<AppointmentDetail />} />
             <Route
               path="/appointments/:id/edit"
               element={<AppointmentForm />}
             />
+            <Route path="/prescriptions" element={<PrescriptionList />} />
+            <Route path="/prescriptions/new" element={<PrescriptionForm />} />
+            <Route path="/prescriptions/:id" element={<PrescriptionDetail />} />
             <Route
-              path="/prescriptions"
-              element={<ComingSoon name="Prescription System" />}
+              path="/prescriptions/:id/edit"
+              element={<PrescriptionForm />}
             />
             <Route
               path="/inventory"
