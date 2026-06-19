@@ -4,40 +4,33 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
 } from 'typeorm';
-import { Patient } from '../patient/patient.entity';
 
-@Entity({ name: 'Appointment' })
-export class Appointment {
-  @PrimaryGeneratedColumn({ name: 'appointment_id' })
-  appointmentId: number;
+@Entity({ name: 'Supplier' })
+export class Supplier {
+  @PrimaryGeneratedColumn({ name: 'supplier_id' })
+  supplierId: number;
 
-  @Column({ name: 'patient_id', type: 'int' })
-  patientId: number;
+  @Column({ name: 'name', type: 'varchar', length: 100 })
+  name: string;
 
-  @Column({ name: 'doctor_id', type: 'int' })
-  doctorId: number;
+  @Column({ name: 'contact_person', type: 'varchar', length: 100, nullable: true })
+  contactPerson: string;
 
-  @ManyToOne(() => Patient, { eager: true })
-  @JoinColumn({ name: 'patient_id' })
-  patient: Patient;
+  @Column({ name: 'phone', type: 'varchar', length: 20, nullable: true })
+  phone: string;
 
-  @Column({ name: 'appointment_date', type: 'datetime' })
-  appointmentDate: Date;
+  @Column({ name: 'email', type: 'varchar', length: 100, nullable: true })
+  email: string;
 
-  @Column({ name: 'appointment_time', type: 'varchar', length: 10, nullable: true })
-  appointmentTime: string;
+  @Column({ name: 'address', type: 'varchar', length: 255, nullable: true })
+  address: string;
 
-  @Column({ name: 'status', type: 'varchar', length: 20, default: 'Scheduled' })
-  status: string;
+  @Column({ name: 'city', type: 'varchar', length: 100, nullable: true })
+  city: string;
 
-  @Column({ name: 'reason', type: 'varchar', length: 255, nullable: true })
-  reason: string;
-
-  @Column({ name: 'notes', type: 'nvarchar', length: 'max', nullable: true })
-  notes: string;
+  @Column({ name: 'country', type: 'varchar', length: 100, nullable: true })
+  country: string;
 
   // ── Soft delete ──────────────────────────────────────────────────────────
   @Column({ name: 'is_deleted', type: 'bit', default: false })

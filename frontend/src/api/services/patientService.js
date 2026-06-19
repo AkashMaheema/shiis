@@ -39,6 +39,11 @@ const patientService = {
    * Delete a patient
    */
   delete: (id) => api.delete(`${ENDPOINT}/${id}`).then((res) => res.data),
+
+  /**
+   * Get patient aggregate stats for the dashboard
+   */
+  getStats: () => api.get(`${ENDPOINT}/stats`).then((res) => res.data),
 };
 
 export default patientService;

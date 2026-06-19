@@ -16,7 +16,17 @@ import LabList from "./pages/Lab/LabList";
 import LabForm from "./pages/Lab/LabForm";
 import LabDetail from "./pages/Lab/LabDetail";
 import LabTestCatalog from "./pages/Lab/LabTestCatalog";
+import SupplierList from "./pages/Supplier/SupplierList";
+import SupplierForm from "./pages/Supplier/SupplierForm";
+import SupplierDetail from "./pages/Supplier/SupplierDetail";
+import StockInList from "./pages/StockIn/StockInList";
+import StockInForm from "./pages/StockIn/StockInForm";
+import StockInDetail from "./pages/StockIn/StockInDetail";
+import StockInReceive from "./pages/StockIn/StockInReceive";
 import { useAuth } from "./contexts/useAuth";
+import PrescriptionList from "./pages/Prescription/PrescriptionList";
+import PrescriptionForm from "./pages/Prescription/PrescriptionForm";
+import PrescriptionDetail from "./pages/Prescription/PrescriptionDetail";
 
 function ComingSoon({ name }) {
   return (
@@ -76,18 +86,23 @@ export default function App() {
               path="/appointments/:id/edit"
               element={<AppointmentForm />}
             />
-            <Route
-              path="/prescriptions"
-              element={<ComingSoon name="Prescription System" />}
-            />
+            <Route path="/prescriptions" element={<PrescriptionList />} />
+            <Route path="/prescriptions/new" element={<PrescriptionForm />} />
+            <Route path="/prescriptions/:id" element={<PrescriptionDetail />} />
+            <Route path="/prescriptions/:id/edit" element={<PrescriptionForm />} />
             <Route
               path="/inventory"
               element={<ComingSoon name="Inventory & Medicine" />}
             />
-            <Route
-              path="/suppliers"
-              element={<ComingSoon name="Suppliers & Purchase Orders" />}
-            />
+            <Route path="/suppliers" element={<SupplierList />} />
+            <Route path="/suppliers/new" element={<SupplierForm />} />
+            <Route path="/suppliers/:id" element={<SupplierDetail />} />
+            <Route path="/suppliers/:id/edit" element={<SupplierForm />} />
+            <Route path="/stock-in" element={<StockInList />} />
+            <Route path="/stock-in/new" element={<StockInForm />} />
+            <Route path="/stock-in/:id" element={<StockInDetail />} />
+            <Route path="/stock-in/:id/edit" element={<StockInForm />} />
+            <Route path="/stock-in/:id/receive" element={<StockInReceive />} />
             <Route
               path="/billing"
               element={<ComingSoon name="Billing System" />}
