@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -12,17 +12,11 @@ import {
   Venus,
   Mars,
   CircleUser,
-  ClipboardList,
-  FileText,
-  Plus,
 } from "lucide-react";
 import patientService from "../../api/services/patientService";
-import appointmentService from "../../api/services/appointmentService";
-import prescriptionService from "../../api/services/prescriptionService";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import { toast } from "react-toastify";
-import { useAuth } from "../../contexts/useAuth";
 
 function genderIcon(gender) {
   if (gender === "Male") return <Mars className="w-4 h-4 text-blue-500" />;
@@ -58,37 +52,10 @@ function DetailRow({ icon, label, value }) {
   );
 }
 
-function EmptyState({ text }) {
-  return (
-    <div className="px-4 py-8 text-center text-sm text-surface-400">
-      {text}
-    </div>
-  );
-}
-
-function formatDate(date) {
-  return date
-    ? new Date(date).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "—";
-}
-
 export default function PatientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const roleName = user?.roleName?.toLowerCase();
-  const isAdmin = roleName === "admin";
-  const isDoctor = roleName === "doctor";
-  const currentDoctorId =
-    user?.doctorId ?? (isDoctor && user?.username === "doctor" ? 1 : null);
   const [patient, setPatient] = useState(null);
-  const [appointments, setAppointments] = useState([]);
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [relatedLoading, setRelatedLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -101,35 +68,6 @@ export default function PatientDetail() {
       })
       .finally(() => setLoading(false));
   }, [id, navigate]);
-
-  useEffect(() => {
-    const filters = { patientId: Number(id) };
-    if (isDoctor && !isAdmin) filters.doctorId = currentDoctorId ?? -1;
-
-    setRelatedLoading(true);
-    Promise.all([
-      appointmentService.getAll(1, 5, {
-        ...filters,
-        sortBy: "appointmentDate",
-        sortOrder: "DESC",
-      }),
-      prescriptionService.getAll(1, 5, {
-        ...filters,
-        sortBy: "issuedDate",
-        sortOrder: "DESC",
-      }),
-    ])
-      .then(([apptResult, rxResult]) => {
-        setAppointments(apptResult.data || []);
-        setPrescriptions(rxResult.data || []);
-      })
-      .catch(() => {
-        toast.error("Failed to load patient history.");
-        setAppointments([]);
-        setPrescriptions([]);
-      })
-      .finally(() => setRelatedLoading(false));
-  }, [id, isDoctor, isAdmin, currentDoctorId]);
 
   if (loading) return <Loader text="Loading patient details..." />;
   if (!patient) return null;
@@ -148,7 +86,7 @@ export default function PatientDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* ── Top bar ── */}
+      {/* -- Top bar -- */}
       <div className="flex items-center justify-between gap-4">
         <button
           onClick={() => navigate("/patients")}
@@ -164,7 +102,7 @@ export default function PatientDetail() {
         </Button>
       </div>
 
-      {/* ── Profile card ── */}
+      {/* -- Profile card -- */}
       <div className="glass-card p-6">
         {/* Avatar + name */}
         <div className="flex items-center gap-5 mb-6 pb-6 border-b border-surface-200/60">
@@ -234,128 +172,7 @@ export default function PatientDetail() {
           />
         </div>
       </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="glass-card overflow-hidden">
-          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-surface-200/70">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-primary-500" />
-              <h2 className="text-sm font-semibold text-surface-900">
-                Previous Appointments
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate("/appointments")}
-              className="text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
-            >
-              View all
-            </button>
-          </div>
-          {relatedLoading ? (
-            <div className="py-8">
-              <Loader text="Loading appointments..." />
-            </div>
-          ) : appointments.length === 0 ? (
-            <EmptyState text="No appointments found" />
-          ) : (
-            <div className="divide-y divide-surface-200/70">
-              {appointments.map((appointment) => (
-                <button
-                  key={appointment.appointmentId}
-                  type="button"
-                  onClick={() =>
-                    navigate(`/appointments/${appointment.appointmentId}`)
-                  }
-                  className="w-full text-left px-5 py-4 hover:bg-primary-50/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-surface-900">
-                        #{appointment.appointmentId} ·{" "}
-                        {appointment.reason || "Appointment"}
-                      </p>
-                      <p className="text-xs text-surface-500 mt-1">
-                        {formatDate(appointment.appointmentDate)} ·{" "}
-                        {appointment.appointmentTime || "No time"}
-                      </p>
-                    </div>
-                    <span className="text-xs text-surface-500 shrink-0">
-                      {appointment.status || "—"}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="glass-card overflow-hidden">
-          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-surface-200/70">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="w-4 h-4 text-primary-500" />
-              <h2 className="text-sm font-semibold text-surface-900">
-                Prescriptions
-              </h2>
-            </div>
-            <Button
-              size="sm"
-              onClick={() =>
-                navigate("/prescriptions/new", {
-                  state: {
-                    patientId: patient.patientId,
-                    patientName: `${patient.firstName} ${patient.lastName} (#${patient.patientId})`,
-                  },
-                })
-              }
-            >
-              <Plus className="w-3.5 h-3.5" />
-              New Prescription
-            </Button>
-          </div>
-          {relatedLoading ? (
-            <div className="py-8">
-              <Loader text="Loading prescriptions..." />
-            </div>
-          ) : prescriptions.length === 0 ? (
-            <EmptyState text="No prescriptions found" />
-          ) : (
-            <div className="divide-y divide-surface-200/70">
-              {prescriptions.map((prescription) => (
-                <button
-                  key={prescription.prescriptionId}
-                  type="button"
-                  onClick={() =>
-                    navigate(`/prescriptions/${prescription.prescriptionId}`)
-                  }
-                  className="w-full text-left px-5 py-4 hover:bg-primary-50/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
-                        <FileText className="w-4 h-4 text-primary-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-surface-900">
-                          Prescription #{prescription.prescriptionId}
-                        </p>
-                        <p className="text-xs text-surface-500 mt-1">
-                          {formatDate(prescription.issuedDate)} ·{" "}
-                          {prescription.itemCount || 0} item
-                          {Number(prescription.itemCount || 0) === 1 ? "" : "s"}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-surface-700 shrink-0">
-                      Rs. {Number(prescription.medicineTotal || 0).toFixed(2)}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
+
