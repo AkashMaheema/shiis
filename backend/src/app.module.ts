@@ -11,6 +11,7 @@ import { AppointmentModule } from './modules/appointment/appointment.module';
 import { LabModule } from './modules/lab/lab.module';
 import { SupplierModule } from './modules/supplier/supplier.module';
 import { StockInModule } from './modules/stock-in/stock-in.module';
+import { BillingModule } from './modules/billing/billing.module';
 
 @Module({
   imports: [
