@@ -19,6 +19,10 @@ import LabTestCatalog from "./pages/Lab/LabTestCatalog";
 import SupplierList from "./pages/Supplier/SupplierList";
 import SupplierForm from "./pages/Supplier/SupplierForm";
 import SupplierDetail from "./pages/Supplier/SupplierDetail";
+import StockInList from "./pages/StockIn/StockInList";
+import StockInForm from "./pages/StockIn/StockInForm";
+import StockInDetail from "./pages/StockIn/StockInDetail";
+import StockInReceive from "./pages/StockIn/StockInReceive";
 import { useAuth } from "./contexts/useAuth";
 
 function ComingSoon({ name }) {
@@ -70,12 +74,9 @@ export default function App() {
               path="/appointments/:id/edit"
               element={<AppointmentForm />}
             />
-            <Route path="/prescriptions" element={<PrescriptionList />} />
-            <Route path="/prescriptions/new" element={<PrescriptionForm />} />
-            <Route path="/prescriptions/:id" element={<PrescriptionDetail />} />
             <Route
-              path="/prescriptions/:id/edit"
-              element={<PrescriptionForm />}
+              path="/prescriptions"
+              element={<ComingSoon name="Prescription System" />}
             />
             <Route
               path="/inventory"
@@ -85,6 +86,11 @@ export default function App() {
             <Route path="/suppliers/new" element={<SupplierForm />} />
             <Route path="/suppliers/:id" element={<SupplierDetail />} />
             <Route path="/suppliers/:id/edit" element={<SupplierForm />} />
+            <Route path="/stock-in" element={<StockInList />} />
+            <Route path="/stock-in/new" element={<StockInForm />} />
+            <Route path="/stock-in/:id" element={<StockInDetail />} />
+            <Route path="/stock-in/:id/edit" element={<StockInForm />} />
+            <Route path="/stock-in/:id/receive" element={<StockInReceive />} />
             <Route
               path="/billing"
               element={<ComingSoon name="Billing System" />}

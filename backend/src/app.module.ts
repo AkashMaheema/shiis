@@ -6,10 +6,11 @@ import databaseConfig from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { PatientModule } from './modules/patient/patient.module';
 import { UsersModule } from './modules/users/users.module';
-import { SupplierModule } from './modules/supplier/supplier.module';
 import { AppointmentModule } from './modules/appointment/appointment.module';
 import { LabModule } from './modules/lab/lab.module';
-import { PrescriptionModule } from './modules/prescription/prescription.module';
+import { SupplierModule } from './modules/supplier/supplier.module';
+import { StockInModule } from './modules/stock-in/stock-in.module';
+import { MedicineModule } from './modules/medicine/medicine.module';
 
 @Module({
   imports: [
@@ -49,10 +50,11 @@ import { PrescriptionModule } from './modules/prescription/prescription.module';
     AuthModule,
     PatientModule,
     UsersModule,
-    SupplierModule,
     AppointmentModule,
     LabModule,
-    PrescriptionModule,
+    SupplierModule,
+    StockInModule,
+    MedicineModule,
   ],
 })
 export class AppModule {}
