@@ -8,6 +8,8 @@ import { PatientModule } from './modules/patient/patient.module';
 import { UsersModule } from './modules/users/users.module';
 import { AppointmentModule } from './modules/appointment/appointment.module';
 import { LabModule } from './modules/lab/lab.module';
+import { SupplierModule } from './modules/supplier/supplier.module';
+import { StockInModule } from './modules/stock-in/stock-in.module';
 
 @Module({
   imports: [
@@ -49,6 +51,8 @@ import { LabModule } from './modules/lab/lab.module';
     UsersModule,
     AppointmentModule,
     LabModule,
+    SupplierModule,
+    StockInModule,
   ],
 })
 export class AppModule {}
