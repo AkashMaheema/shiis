@@ -9,6 +9,20 @@ import PatientForm from "./pages/Patient/PatientForm";
 import PatientDetail from "./pages/Patient/PatientDetail";
 import UserList from "./pages/User/UserList";
 import UserForm from "./pages/User/UserForm";
+import AppointmentList from "./pages/Appointment/AppointmentList";
+import AppointmentForm from "./pages/Appointment/AppointmentForm";
+import AppointmentDetail from "./pages/Appointment/AppointmentDetail";
+import LabList from "./pages/Lab/LabList";
+import LabForm from "./pages/Lab/LabForm";
+import LabDetail from "./pages/Lab/LabDetail";
+import LabTestCatalog from "./pages/Lab/LabTestCatalog";
+import SupplierList from "./pages/Supplier/SupplierList";
+import SupplierForm from "./pages/Supplier/SupplierForm";
+import SupplierDetail from "./pages/Supplier/SupplierDetail";
+import StockInList from "./pages/StockIn/StockInList";
+import StockInForm from "./pages/StockIn/StockInForm";
+import StockInDetail from "./pages/StockIn/StockInDetail";
+import StockInReceive from "./pages/StockIn/StockInReceive";
 import { useAuth } from "./contexts/useAuth";
 import PrescriptionList from "./pages/Prescription/PrescriptionList";
 import PrescriptionForm from "./pages/Prescription/PrescriptionForm";
@@ -58,7 +72,19 @@ export default function App() {
             />
             <Route
               path="/appointments"
-              element={<ComingSoon name="Appointment System" />}
+              element={<AppointmentList />}
+            />
+            <Route
+              path="/appointments/new"
+              element={<AppointmentForm />}
+            />
+            <Route
+              path="/appointments/:id"
+              element={<AppointmentDetail />}
+            />
+            <Route
+              path="/appointments/:id/edit"
+              element={<AppointmentForm />}
             />
             <Route path="/prescriptions" element={<PrescriptionList />} />
             <Route path="/prescriptions/new" element={<PrescriptionForm />} />
@@ -68,15 +94,24 @@ export default function App() {
               path="/inventory"
               element={<ComingSoon name="Inventory & Medicine" />}
             />
-            <Route
-              path="/suppliers"
-              element={<ComingSoon name="Suppliers & Purchase Orders" />}
-            />
+            <Route path="/suppliers" element={<SupplierList />} />
+            <Route path="/suppliers/new" element={<SupplierForm />} />
+            <Route path="/suppliers/:id" element={<SupplierDetail />} />
+            <Route path="/suppliers/:id/edit" element={<SupplierForm />} />
+            <Route path="/stock-in" element={<StockInList />} />
+            <Route path="/stock-in/new" element={<StockInForm />} />
+            <Route path="/stock-in/:id" element={<StockInDetail />} />
+            <Route path="/stock-in/:id/edit" element={<StockInForm />} />
+            <Route path="/stock-in/:id/receive" element={<StockInReceive />} />
             <Route
               path="/billing"
               element={<ComingSoon name="Billing System" />}
             />
-            <Route path="/lab" element={<ComingSoon name="Lab Management" />} />
+            <Route path="/lab" element={<LabList />} />
+            <Route path="/lab/new" element={<LabForm />} />
+            <Route path="/lab/tests" element={<LabTestCatalog />} />
+            <Route path="/lab/:id" element={<LabDetail />} />
+            <Route path="/lab/:id/edit" element={<LabForm />} />
           </Route>
         </Route>
 
