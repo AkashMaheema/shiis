@@ -9,7 +9,13 @@ const appointmentService = {
   getAll: (page = 1, limit = 20, filters = {}) =>
     api
       .get(ENDPOINT, {
-        params: { page, limit, sortBy: "appointmentId", sortOrder: "DESC", ...filters },
+        params: {
+          page,
+          limit,
+          sortBy: "appointmentId",
+          sortOrder: "DESC",
+          ...filters,
+        },
       })
       .then((res) => res.data),
 
@@ -39,6 +45,11 @@ const appointmentService = {
    * Soft-delete an appointment
    */
   delete: (id) => api.delete(`${ENDPOINT}/${id}`).then((res) => res.data),
+
+  /**
+   * Get appointment aggregate stats for the dashboard
+   */
+  getStats: () => api.get(`${ENDPOINT}/stats`).then((res) => res.data),
 };
 
 export default appointmentService;
