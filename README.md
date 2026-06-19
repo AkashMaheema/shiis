@@ -23,8 +23,8 @@ shiis/
 │   │   ├── common/          # Filters, interceptors, pipes
 │   │   └── modules/         # Feature modules
 │   │       ├── patient/     # ✅ Complete
-│   │       ├── doctor/      # 🚧 Pending
-│   │       ├── appointment/ # 🚧 Pending
+│   │       ├── doctor/      # ✅ Pending
+│   │       ├── appointment/ # ✅ Pending
 │   │       └── ...
 │   └── .env
 ├── frontend/                # React Vite client
