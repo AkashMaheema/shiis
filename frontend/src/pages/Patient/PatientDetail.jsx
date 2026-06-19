@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -86,7 +86,7 @@ export default function PatientDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* ── Top bar ── */}
+      {/* -- Top bar -- */}
       <div className="flex items-center justify-between gap-4">
         <button
           onClick={() => navigate("/patients")}
@@ -102,7 +102,7 @@ export default function PatientDetail() {
         </Button>
       </div>
 
-      {/* ── Profile card ── */}
+      {/* -- Profile card -- */}
       <div className="glass-card p-6">
         {/* Avatar + name */}
         <div className="flex items-center gap-5 mb-6 pb-6 border-b border-surface-200/60">
@@ -175,3 +175,4 @@ export default function PatientDetail() {
     </div>
   );
 }
+
