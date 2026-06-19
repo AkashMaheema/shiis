@@ -40,6 +40,12 @@ export class AppointmentQueryDto {
   @IsInt()
   patientId?: number;
 
+  /** Filter by specific doctor */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  doctorId?: number;
+
   /** Include soft-deleted records (admin use) */
   @IsOptional()
   @IsIn(['true', 'false', true, false])

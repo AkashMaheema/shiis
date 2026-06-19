@@ -55,7 +55,7 @@ export class AppointmentService {
 
     @InjectRepository(AppointmentAudit)
     private readonly auditRepo: Repository<AppointmentAudit>,
-  ) {}
+  ) { }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -72,6 +72,7 @@ export class AppointmentService {
       'doctorId',
       'appointmentDate',
       'appointmentTime',
+      'consultationFee',
       'status',
       'reason',
       'notes',
@@ -128,6 +129,7 @@ export class AppointmentService {
       dateFrom,
       dateTo,
       patientId,
+      doctorId,
       includeDeleted,
       sortBy = 'appointmentId',
       sortOrder = 'DESC',
@@ -174,6 +176,10 @@ export class AppointmentService {
       qb.andWhere('a.patientId = :patientId', { patientId });
     }
 
+    if (doctorId) {
+      qb.andWhere('a.doctorId = :doctorId', { doctorId });
+    }
+
     // Sorting
     const sortCol = SORT_COLUMN_MAP[sortBy] ?? 'a.appointmentId';
     qb.orderBy(sortCol, sortOrder);
@@ -212,6 +218,7 @@ export class AppointmentService {
 
     const appointment = this.appointmentRepo.create({
       ...dto,
+      consultationFee: dto.consultationFee ?? 1000,
       status: dto.status || 'Scheduled',
       createdAt: now,
       updatedAt: now,

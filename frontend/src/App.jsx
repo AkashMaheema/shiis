@@ -16,14 +16,12 @@ import LabList from "./pages/Lab/LabList";
 import LabForm from "./pages/Lab/LabForm";
 import LabDetail from "./pages/Lab/LabDetail";
 import LabTestCatalog from "./pages/Lab/LabTestCatalog";
-main
 import SupplierList from "./pages/Supplier/SupplierList";
 import SupplierForm from "./pages/Supplier/SupplierForm";
 import SupplierDetail from "./pages/Supplier/SupplierDetail";
 import MedicineList from "./pages/Medicine/MedicineList";
 import MedicineForm from "./pages/Medicine/MedicineForm";
 import MedicineDetail from "./pages/Medicine/MedicineDetail";
-thisaru
 import { useAuth } from "./contexts/useAuth";
 
 function ComingSoon({ name }) {
