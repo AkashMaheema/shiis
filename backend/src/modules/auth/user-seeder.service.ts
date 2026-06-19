@@ -30,14 +30,18 @@ export class UserSeederService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const existingUsers = await this.userRepository.count();
+    try {
+      const existingUsers = await this.userRepository.count();
 
-    if (existingUsers === 0) {
-      // Fresh DB — seed all default users with hashed passwords
-      await this.seedFresh();
-    } else {
-      // DB already has users — re-hash any that still have plain-text passwords
-      await this.rehashPlainPasswords();
+      if (existingUsers === 0) {
+        // Fresh DB — seed all default users with hashed passwords
+        await this.seedFresh();
+      } else {
+        // DB already has users — re-hash any that still have plain-text passwords
+        await this.rehashPlainPasswords();
+      }
+    } catch (err: any) {
+      this.logger.warn(`Failed to seed users (tables might not exist yet): ${err.message || err}`);
     }
   }
 

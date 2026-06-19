@@ -9,6 +9,21 @@ import PatientForm from "./pages/Patient/PatientForm";
 import PatientDetail from "./pages/Patient/PatientDetail";
 import UserList from "./pages/User/UserList";
 import UserForm from "./pages/User/UserForm";
+import AppointmentList from "./pages/Appointment/AppointmentList";
+import AppointmentForm from "./pages/Appointment/AppointmentForm";
+import AppointmentDetail from "./pages/Appointment/AppointmentDetail";
+import LabList from "./pages/Lab/LabList";
+import LabForm from "./pages/Lab/LabForm";
+import LabDetail from "./pages/Lab/LabDetail";
+import LabTestCatalog from "./pages/Lab/LabTestCatalog";
+main
+import SupplierList from "./pages/Supplier/SupplierList";
+import SupplierForm from "./pages/Supplier/SupplierForm";
+import SupplierDetail from "./pages/Supplier/SupplierDetail";
+import MedicineList from "./pages/Medicine/MedicineList";
+import MedicineForm from "./pages/Medicine/MedicineForm";
+import MedicineDetail from "./pages/Medicine/MedicineDetail";
+thisaru
 import { useAuth } from "./contexts/useAuth";
 
 function ComingSoon({ name }) {
@@ -55,7 +70,19 @@ export default function App() {
             />
             <Route
               path="/appointments"
-              element={<ComingSoon name="Appointment System" />}
+              element={<AppointmentList />}
+            />
+            <Route
+              path="/appointments/new"
+              element={<AppointmentForm />}
+            />
+            <Route
+              path="/appointments/:id"
+              element={<AppointmentDetail />}
+            />
+            <Route
+              path="/appointments/:id/edit"
+              element={<AppointmentForm />}
             />
             <Route
               path="/prescriptions"
@@ -63,17 +90,33 @@ export default function App() {
             />
             <Route
               path="/inventory"
-              element={<ComingSoon name="Inventory & Medicine" />}
+              element={<MedicineList />}
             />
             <Route
-              path="/suppliers"
-              element={<ComingSoon name="Suppliers & Purchase Orders" />}
+              path="/inventory/new"
+              element={<MedicineForm />}
             />
+            <Route
+              path="/inventory/:id"
+              element={<MedicineDetail />}
+            />
+            <Route
+              path="/inventory/:id/edit"
+              element={<MedicineForm />}
+            />
+            <Route path="/suppliers" element={<SupplierList />} />
+            <Route path="/suppliers/new" element={<SupplierForm />} />
+            <Route path="/suppliers/:id" element={<SupplierDetail />} />
+            <Route path="/suppliers/:id/edit" element={<SupplierForm />} />
             <Route
               path="/billing"
               element={<ComingSoon name="Billing System" />}
             />
-            <Route path="/lab" element={<ComingSoon name="Lab Management" />} />
+            <Route path="/lab" element={<LabList />} />
+            <Route path="/lab/new" element={<LabForm />} />
+            <Route path="/lab/tests" element={<LabTestCatalog />} />
+            <Route path="/lab/:id" element={<LabDetail />} />
+            <Route path="/lab/:id/edit" element={<LabForm />} />
           </Route>
         </Route>
 
