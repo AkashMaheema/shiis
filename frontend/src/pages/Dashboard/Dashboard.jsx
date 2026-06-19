@@ -1,104 +1,156 @@
 import { useEffect, useState } from "react";
 import {
   Users,
-  Stethoscope,
+  Truck,
   CalendarCheck,
   Pill,
-  TrendingUp,
-  AlertTriangle,
-  DollarSign,
+  Calendar,
   FlaskConical,
+  AlertTriangle,
+  Activity,
 } from "lucide-react";
+import patientService from "../../api/services/patientService";
+import appointmentService from "../../api/services/appointmentService";
+import medicineService from "../../api/services/medicineService";
+import supplierService from "../../api/services/supplierService";
 import labService from "../../api/services/labService";
 
-const baseStats = [
-  {
-    label: "Total Patients",
-    value: "—",
-    change: "",
-    icon: Users,
-    color: "from-primary-500 to-primary-600",
-    bg: "bg-primary-500/10",
-    text: "text-primary-600",
-  },
-  {
-    label: "Active Doctors",
-    value: "—",
-    change: "",
-    icon: Stethoscope,
-    color: "from-accent-500 to-accent-600",
-    bg: "bg-accent-500/10",
-    text: "text-accent-600",
-  },
-  {
-    label: "Today's Appointments",
-    value: "—",
-    change: "",
-    icon: CalendarCheck,
-    color: "from-blue-500 to-blue-600",
-    bg: "bg-blue-500/10",
-    text: "text-blue-600",
-  },
-  {
-    label: "Medicines in Stock",
-    value: "—",
-    change: "",
-    icon: Pill,
-    color: "from-emerald-500 to-emerald-600",
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-600",
-  },
-  {
-    label: "Monthly Revenue",
-    value: "—",
-    change: "",
-    icon: DollarSign,
-    color: "from-amber-500 to-amber-600",
-    bg: "bg-amber-500/10",
-    text: "text-amber-600",
-  },
-  {
-    label: "Pending Lab Tests",
-    value: "—",
-    change: "",
-    icon: FlaskConical,
-    color: "from-rose-500 to-rose-600",
-    bg: "bg-rose-500/10",
-    text: "text-rose-600",
-  },
-  {
-    label: "Low Stock Alerts",
-    value: "—",
-    change: "",
-    icon: AlertTriangle,
-    color: "from-orange-500 to-orange-600",
-    bg: "bg-orange-500/10",
-    text: "text-orange-600",
-  },
-  {
-    label: "Revenue Trend",
-    value: "—",
-    change: "",
-    icon: TrendingUp,
-    color: "from-violet-500 to-violet-600",
-    bg: "bg-violet-500/10",
-    text: "text-violet-600",
-  },
-];
+const STATUS_COLORS = {
+  Scheduled: "bg-blue-100 text-blue-700",
+  Completed: "bg-emerald-100 text-emerald-700",
+  Cancelled: "bg-red-100 text-red-700",
+  "No-Show": "bg-amber-100 text-amber-700",
+};
 
 export default function Dashboard() {
-  const [pendingLab, setPendingLab] = useState("—");
+  const [allStats, setAllStats] = useState(null);
+  const [recentAppointments, setRecentAppointments] = useState([]);
+  const [lowStockMedicines, setLowStockMedicines] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    labService
-      .getStats()
-      .then((s) => setPendingLab(String(s.pendingRequests ?? "—")))
-      .catch(() => setPendingLab("—"));
+    Promise.allSettled([
+      patientService.getStats(),
+      appointmentService.getStats(),
+      medicineService.getStats(),
+      supplierService.getStats(),
+      labService.getStats(),
+      appointmentService.getAll(1, 5),
+      medicineService.getAll(1, 8, { lowStockOnly: true }),
+    ]).then(
+      ([patientRes, apptRes, medRes, supplierRes, labRes, recentApptRes, lowStockRes]) => {
+        setAllStats({
+          patient: patientRes.status === "fulfilled" ? patientRes.value : null,
+          appt: apptRes.status === "fulfilled" ? apptRes.value : null,
+          med: medRes.status === "fulfilled" ? medRes.value : null,
+          supplier: supplierRes.status === "fulfilled" ? supplierRes.value : null,
+          lab: labRes.status === "fulfilled" ? labRes.value : null,
+        });
+
+        if (recentApptRes.status === "fulfilled") {
+          setRecentAppointments(recentApptRes.value?.data ?? []);
+        }
+        if (lowStockRes.status === "fulfilled") {
+          setLowStockMedicines(lowStockRes.value?.data ?? []);
+        }
+
+        setLoading(false);
+      },
+    );
   }, []);
 
-  const stats = baseStats.map((s) =>
-    s.label === "Pending Lab Tests" ? { ...s, value: pendingLab } : s,
-  );
+  const val = (v) => (loading ? "…" : v != null ? String(v) : "—");
+
+  const statCards = [
+    {
+      label: "Total Patients",
+      value: val(allStats?.patient?.active),
+      change:
+        allStats?.patient?.addedThisMonth != null
+          ? `+${allStats.patient.addedThisMonth} this month`
+          : "",
+      icon: Users,
+      bg: "bg-primary-500/10",
+      text: "text-primary-600",
+    },
+    {
+      label: "Active Suppliers",
+      value: val(allStats?.supplier?.active),
+      change:
+        allStats?.supplier?.addedThisMonth != null
+          ? `+${allStats.supplier.addedThisMonth} this month`
+          : "",
+      icon: Truck,
+      bg: "bg-accent-500/10",
+      text: "text-accent-600",
+    },
+    {
+      label: "Today's Appointments",
+      value: val(allStats?.appt?.todayCount),
+      change:
+        allStats?.appt?.scheduled != null
+          ? `${allStats.appt.scheduled} scheduled`
+          : "",
+      icon: CalendarCheck,
+      bg: "bg-blue-500/10",
+      text: "text-blue-600",
+    },
+    {
+      label: "Medicines in Stock",
+      value: val(allStats?.med?.total),
+      change:
+        allStats?.med?.outOfStock != null
+          ? `${allStats.med.outOfStock} out of stock`
+          : "",
+      icon: Pill,
+      bg: "bg-emerald-500/10",
+      text: "text-emerald-600",
+    },
+    {
+      label: "Scheduled Appointments",
+      value: val(allStats?.appt?.scheduled),
+      change:
+        allStats?.appt?.completed != null
+          ? `${allStats.appt.completed} completed`
+          : "",
+      icon: Calendar,
+      bg: "bg-amber-500/10",
+      text: "text-amber-600",
+    },
+    {
+      label: "Pending Lab Tests",
+      value: val(allStats?.lab?.pendingRequests),
+      change:
+        allStats?.lab?.todayRequests != null
+          ? `${allStats.lab.todayRequests} today`
+          : "",
+      icon: FlaskConical,
+      bg: "bg-rose-500/10",
+      text: "text-rose-600",
+    },
+    {
+      label: "Low Stock Alerts",
+      value: val(allStats?.med?.lowStock),
+      change:
+        allStats?.med?.outOfStock != null
+          ? `${allStats.med.outOfStock} out of stock`
+          : "",
+      icon: AlertTriangle,
+      bg: "bg-orange-500/10",
+      text: "text-orange-600",
+    },
+    {
+      label: "Lab Tests Today",
+      value: val(allStats?.lab?.todayRequests),
+      change:
+        allStats?.lab?.completedRequests != null
+          ? `${allStats.lab.completedRequests} completed total`
+          : "",
+      icon: Activity,
+      bg: "bg-violet-500/10",
+      text: "text-violet-600",
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -116,7 +168,7 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <div
             key={stat.label}
             className="glass-card p-5 flex items-start gap-4 group hover:scale-[1.02] transition-transform duration-200"
@@ -132,23 +184,60 @@ export default function Dashboard() {
                 {stat.value}
               </p>
               {stat.change && (
-                <p className="text-xs text-emerald-600 mt-0.5">{stat.change}</p>
+                <p className="text-xs text-surface-400 mt-0.5">{stat.change}</p>
               )}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Placeholder Panels */}
+      {/* Live Data Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Appointments */}
         <div className="glass-card p-6">
           <h3 className="text-base font-semibold text-surface-900 mb-4">
             Recent Appointments
           </h3>
-          <div className="flex items-center justify-center h-40 text-surface-400 text-sm">
-            Connect modules to display live data
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center h-40 text-surface-400 text-sm">
+              Loading…
+            </div>
+          ) : recentAppointments.length === 0 ? (
+            <div className="flex items-center justify-center h-40 text-surface-400 text-sm">
+              No appointments found
+            </div>
+          ) : (
+            <ul className="divide-y divide-surface-200">
+              {recentAppointments.map((appt) => (
+                <li
+                  key={appt.appointmentId}
+                  className="py-2.5 flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-surface-900 truncate">
+                      {appt.patient
+                        ? `${appt.patient.firstName} ${appt.patient.lastName}`
+                        : `Patient #${appt.patientId}`}
+                    </p>
+                    <p className="text-xs text-surface-500 mt-0.5">
+                      {appt.appointmentDate
+                        ? new Date(appt.appointmentDate).toLocaleDateString()
+                        : "—"}
+                      {appt.appointmentTime ? ` · ${appt.appointmentTime}` : ""}
+                      {appt.reason ? ` · ${appt.reason}` : ""}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                      STATUS_COLORS[appt.status] ?? "bg-surface-100 text-surface-600"
+                    }`}
+                  >
+                    {appt.status ?? "—"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Inventory Alerts */}
@@ -156,9 +245,46 @@ export default function Dashboard() {
           <h3 className="text-base font-semibold text-surface-900 mb-4">
             Inventory Alerts
           </h3>
-          <div className="flex items-center justify-center h-40 text-surface-400 text-sm">
-            Connect modules to display live data
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center h-40 text-surface-400 text-sm">
+              Loading…
+            </div>
+          ) : lowStockMedicines.length === 0 ? (
+            <div className="flex items-center justify-center h-40 text-emerald-600 text-sm font-medium">
+              All medicines are sufficiently stocked
+            </div>
+          ) : (
+            <ul className="divide-y divide-surface-200">
+              {lowStockMedicines.map((med) => {
+                const qty = med.stock?.totalQuantity ?? 0;
+                const isOut = qty === 0;
+                return (
+                  <li
+                    key={med.medicineId}
+                    className="py-2.5 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-surface-900 truncate">
+                        {med.name}
+                      </p>
+                      <p className="text-xs text-surface-500 mt-0.5">
+                        {med.category ?? "Uncategorized"}
+                      </p>
+                    </div>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                        isOut
+                          ? "bg-red-100 text-red-700"
+                          : "bg-orange-100 text-orange-700"
+                      }`}
+                    >
+                      {isOut ? "Out of stock" : `${qty} left`}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </div>
     </div>

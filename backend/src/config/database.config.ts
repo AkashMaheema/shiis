@@ -1,3 +1,4 @@
+/// <reference path="../types/mssql-msnodesqlv8.d.ts" />
 import { registerAs } from '@nestjs/config';
 import sql from 'mssql/msnodesqlv8';
 
@@ -11,7 +12,7 @@ export default registerAs('database', () => {
   const password = process.env.DB_PASSWORD;
   const useSqlAuthentication = Boolean(username && password !== undefined);
   const connectionString = useSqlAuthentication
-    ? `Driver={ODBC Driver 18 for SQL Server};` +
+    ? `Driver={ODBC Driver 17 for SQL Server};` +
       `Server=${normalizedHost};` +
       `Database=${database};` +
       `Uid=${username};` +
@@ -22,7 +23,7 @@ export default registerAs('database', () => {
       'Pooling=False;' +
       'MultipleActiveResultSets=False;' +
       'Command Timeout=2147483647;'
-    : `Driver={ODBC Driver 18 for SQL Server};` +
+    : `Driver={ODBC Driver 17 for SQL Server};` +
       `Server=${normalizedHost};` +
       `Database=${database};` +
       'Trusted_Connection=Yes;' +
