@@ -75,14 +75,14 @@ npm run dev             # http://localhost:5173
 
 - ✅ User Management
 - ✅ Patient Management
-- 🚧 Doctor Management
-- 🚧 Appointment System
-- 🚧 Prescription System
-- 🚧 Inventory & Medicine
-- 🚧 Supplier & Purchase Orders
-- 🚧 Billing System
-- 🚧 Lab Management
-- 🚧 BI Dashboard
+- ✅ Doctor Management
+- ✅ Appointment System
+- ✅ Prescription System
+- ✅ Inventory & Medicine
+- ✅ Supplier & Purchase Orders
+- ✅ Billing System
+- ✅ Lab Management
+- ✅ BI Dashboard
 
 ## Environment Variables
 
