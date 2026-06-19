@@ -7,6 +7,7 @@ import {
   Stethoscope,
   CalendarCheck,
   ClipboardList,
+  FileText,
   Pill,
   Truck,
   Receipt,
@@ -20,6 +21,7 @@ import {
 const ROLE_VISIBILITY = {
   admin: [
     "/",
+    "/reports",
     "/patients",
     "/doctors",
     "/appointments",
@@ -31,8 +33,9 @@ const ROLE_VISIBILITY = {
     "/lab",
     "/users",
   ],
-  doctor: ["/", "/patients", "/appointments", "/prescriptions"],
-  lab: ["/", "/patients", "/lab"],
+  doctor: ["/", "/reports", "/patients", "/appointments", "/prescriptions"],
+  lab: ["/", "/reports", "/patients", "/lab"],
+  user: ["/", "/reports", "/patients", "/appointments", "/inventory", "/billing"],
 };
 
 const navItems = [
@@ -47,6 +50,7 @@ const navItems = [
   { to: "/billing", label: "Billing", icon: Receipt },
   { to: "/lab", label: "Lab Management", icon: FlaskConical },
   { to: "/users", label: "Users", icon: UserCircle },
+  { to: "/reports", label: "Reports", icon: FileText },
 ];
 
 export default function Sidebar({ collapsed = false, onToggleCollapse }) {
