@@ -9,6 +9,7 @@ import FormInput from "../../components/common/FormInput";
 import FormSelect from "../../components/common/FormSelect";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
+import { useAuth } from "../../contexts/useAuth";
 
 const statusOptions = [
   { value: "Scheduled", label: "Scheduled" },
@@ -22,6 +23,7 @@ const initialForm = {
   doctorId: "",
   appointmentDate: "",
   appointmentTime: "",
+  consultationFee: "1000",
   status: "Scheduled",
   reason: "",
   notes: "",
@@ -45,6 +47,12 @@ export default function AppointmentForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const { user } = useAuth();
+  const roleName = user?.roleName?.toLowerCase();
+  const isAdmin = roleName === "admin";
+  const isDoctor = roleName === "doctor";
+  const currentDoctorId =
+    user?.doctorId ?? (isDoctor && user?.username === "doctor" ? 1 : null);
 
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
@@ -90,6 +98,16 @@ export default function AppointmentForm() {
       appointmentService
         .getById(id)
         .then((appt) => {
+          if (
+            isDoctor &&
+            !isAdmin &&
+            currentDoctorId &&
+            Number(appt.doctorId) !== Number(currentDoctorId)
+          ) {
+            toast.error("You can only edit your own appointments.");
+            navigate("/appointments");
+            return;
+          }
           setForm({
             patientId: appt.patientId || "",
             doctorId: appt.doctorId || "",
@@ -97,6 +115,10 @@ export default function AppointmentForm() {
               ? appt.appointmentDate.split("T")[0]
               : "",
             appointmentTime: appt.appointmentTime || "",
+            consultationFee:
+              appt.consultationFee === null || appt.consultationFee === undefined
+                ? "1000"
+                : String(appt.consultationFee),
             status: appt.status || "Scheduled",
             reason: appt.reason || "",
             notes: appt.notes || "",
@@ -107,7 +129,7 @@ export default function AppointmentForm() {
         })
         .finally(() => setFetching(false));
     }
-  }, [id, isEdit]);
+  }, [id, isEdit, isDoctor, isAdmin, currentDoctorId, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -120,14 +142,20 @@ export default function AppointmentForm() {
   const validate = () => {
     const errs = {};
     const today = todayDateString();
+    const selectedDoctorId =
+      isDoctor && !isAdmin && currentDoctorId ? currentDoctorId : form.doctorId;
     if (!form.patientId) errs.patientId = "Patient is required";
-    if (!form.doctorId) errs.doctorId = "Doctor is required";
+    if (!selectedDoctorId) errs.doctorId = "Doctor is required";
     if (!form.appointmentDate)
       errs.appointmentDate = "Appointment date is required";
     else if (form.appointmentDate < today)
       errs.appointmentDate = "Appointment date cannot be in the past";
     if (!form.appointmentTime)
       errs.appointmentTime = "Appointment time is required";
+    if (form.consultationFee === "")
+      errs.consultationFee = "Consultation fee is required";
+    else if (Number(form.consultationFee) < 0)
+      errs.consultationFee = "Consultation fee cannot be negative";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -141,7 +169,10 @@ export default function AppointmentForm() {
       const payload = {
         ...form,
         patientId: Number(form.patientId),
-        doctorId: Number(form.doctorId),
+        doctorId: Number(
+          isDoctor && !isAdmin && currentDoctorId ? currentDoctorId : form.doctorId,
+        ),
+        consultationFee: Number(form.consultationFee),
       };
 
       if (isEdit) {
@@ -168,7 +199,12 @@ export default function AppointmentForm() {
     label: `${p.firstName} ${p.lastName} (#${p.patientId})`,
   }));
 
-  const doctorOptions = doctors.map((d) => {
+  const visibleDoctors =
+    isDoctor && !isAdmin && currentDoctorId
+      ? doctors.filter((d) => Number(d.doctorId) === Number(currentDoctorId))
+      : doctors;
+
+  const doctorOptions = visibleDoctors.map((d) => {
     const doctorLabel = formatDoctorName(d.firstName, d.lastName);
     return {
       value: d.doctorId,
@@ -217,12 +253,17 @@ export default function AppointmentForm() {
           <FormSelect
             label="Doctor"
             name="doctorId"
-            value={form.doctorId}
+            value={
+              isDoctor && !isAdmin && currentDoctorId
+                ? currentDoctorId
+                : form.doctorId
+            }
             onChange={handleChange}
             options={doctorOptions}
             error={errors.doctorId}
             required
             placeholder={loadingDoctors ? "Loading doctors..." : "Select doctor..."}
+            disabled={isDoctor && !isAdmin && Boolean(currentDoctorId)}
           />
         </div>
 
@@ -249,7 +290,7 @@ export default function AppointmentForm() {
           />
         </div>
 
-        {/* Status + Reason */}
+        {/* Status + Fee */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormSelect
             label="Status"
@@ -259,6 +300,21 @@ export default function AppointmentForm() {
             options={statusOptions}
             error={errors.status}
           />
+          <FormInput
+            label="Consultation Fee"
+            name="consultationFee"
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.consultationFee}
+            onChange={handleChange}
+            error={errors.consultationFee}
+            required
+          />
+        </div>
+
+        {/* Reason */}
+        <div>
           <FormInput
             label="Reason for Visit"
             name="reason"

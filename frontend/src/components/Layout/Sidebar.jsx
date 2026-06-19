@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Activity,
+  PackageCheck,
 } from "lucide-react";
 
 const ROLE_VISIBILITY = {
@@ -25,6 +26,7 @@ const ROLE_VISIBILITY = {
     "/prescriptions",
     "/inventory",
     "/suppliers",
+    "/stock-in",
     "/billing",
     "/lab",
     "/users",
@@ -41,6 +43,7 @@ const navItems = [
   { to: "/prescriptions", label: "Prescriptions", icon: ClipboardList },
   { to: "/inventory", label: "Inventory", icon: Pill },
   { to: "/suppliers", label: "Suppliers", icon: Truck },
+  { to: "/stock-in", label: "Stock In", icon: PackageCheck },
   { to: "/billing", label: "Billing", icon: Receipt },
   { to: "/lab", label: "Lab Management", icon: FlaskConical },
   { to: "/users", label: "Users", icon: UserCircle },

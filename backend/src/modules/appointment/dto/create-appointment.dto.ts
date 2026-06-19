@@ -4,9 +4,12 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
+  IsNumber,
   MaxLength,
   IsNotEmpty,
+  Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export enum AppointmentStatus {
   SCHEDULED = 'Scheduled',
@@ -32,6 +35,12 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   @MaxLength(10)
   appointmentTime: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  consultationFee?: number;
 
   @IsOptional()
   @IsEnum(AppointmentStatus)

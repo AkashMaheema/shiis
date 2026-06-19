@@ -1,59 +1,51 @@
 import {
   IsOptional,
   IsString,
-  IsEnum,
-  IsDateString,
   IsInt,
+  IsIn,
+  IsDateString,
   Min,
   Max,
-  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { AppointmentStatus } from './create-appointment.dto';
 
 export type SortOrder = 'ASC' | 'DESC';
 
-export class AppointmentQueryDto {
-  /** Full-text search across patient name and reason */
+export class PurchaseOrderQueryDto {
+  /** Full-text search across notes, supplier */
   @IsOptional()
   @IsString()
   search?: string;
 
   /** Filter by status */
   @IsOptional()
-  @IsEnum(AppointmentStatus)
-  status?: AppointmentStatus;
+  @IsIn(['Draft', 'Pending', 'Received', 'Cancelled'])
+  status?: string;
 
-  /** Filter appointments on or after this date (YYYY-MM-DD) */
+  /** Filter by supplier */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  supplierId?: number;
+
+  /** Orders placed on or after this date */
   @IsOptional()
   @IsDateString()
   dateFrom?: string;
 
-  /** Filter appointments on or before this date (YYYY-MM-DD) */
+  /** Orders placed on or before this date */
   @IsOptional()
   @IsDateString()
   dateTo?: string;
 
-  /** Filter by specific patient */
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  patientId?: number;
-
-  /** Filter by specific doctor */
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  doctorId?: number;
-
-  /** Include soft-deleted records (admin use) */
+  /** Include soft-deleted records */
   @IsOptional()
   @IsIn(['true', 'false', true, false])
   includeDeleted?: string | boolean;
 
-  /** Field to sort by */
+  /** Sort field */
   @IsOptional()
-  @IsIn(['appointmentDate', 'status', 'createdAt', 'appointmentId'])
+  @IsIn(['poId', 'orderDate', 'status', 'totalAmount', 'createdAt'])
   sortBy?: string;
 
   /** Sort direction */
@@ -73,6 +65,6 @@ export class AppointmentQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(1000)
+  @Max(100)
   limit?: number = 20;
 }

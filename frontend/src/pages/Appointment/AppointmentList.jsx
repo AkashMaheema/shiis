@@ -9,6 +9,7 @@ import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import Modal from "../../components/common/Modal";
 import StatusBadge from "../../components/common/StatusBadge";
+import { useAuth } from "../../contexts/useAuth";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Statuses" },
@@ -26,6 +27,12 @@ const formatDoctorName = (firstName, lastName) => {
 
 export default function AppointmentList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const roleName = user?.roleName?.toLowerCase();
+  const isAdmin = roleName === "admin";
+  const isDoctor = roleName === "doctor";
+  const currentDoctorId =
+    user?.doctorId ?? (isDoctor && user?.username === "doctor" ? 1 : null);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -46,6 +53,9 @@ export default function AppointmentList() {
       const filters = {};
       if (search.trim()) filters.search = search.trim();
       if (statusFilter) filters.status = statusFilter;
+      if (isDoctor && !isAdmin) {
+        filters.doctorId = currentDoctorId ?? -1;
+      }
 
       const result = await appointmentService.getAll(page, limit, filters);
       setAppointments(result.data || []);
@@ -56,7 +66,7 @@ export default function AppointmentList() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, isDoctor, isAdmin, currentDoctorId]);
 
   useEffect(() => {
     const debounce = setTimeout(fetchAppointments, search ? 400 : 0);
@@ -128,25 +138,31 @@ export default function AppointmentList() {
         );
       },
     },
-    {
-      key: "doctorId",
-      label: "Doctor",
-      render: (row) => (
-        <span className="text-surface-700 font-medium">
-          {row.doctorId ? doctorMap[row.doctorId] || `Doctor #${row.doctorId}` : "—"}
-        </span>
-      ),
-    },
+    ...(isAdmin
+      ? [
+        {
+          key: "doctorId",
+          label: "Doctor",
+          render: (row) => (
+            <span className="text-surface-700 font-medium">
+              {row.doctorId
+                ? doctorMap[row.doctorId] || `Doctor #${row.doctorId}`
+                : "—"}
+            </span>
+          ),
+        },
+      ]
+      : []),
     {
       key: "appointmentDate",
       label: "Date & Time",
       render: (row) => {
         const date = row.appointmentDate
           ? new Date(row.appointmentDate).toLocaleDateString("en-IN", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
           : "—";
         return (
           <div>

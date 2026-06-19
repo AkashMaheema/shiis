@@ -11,6 +11,8 @@ import {
   FileText,
   ClipboardList,
   Activity,
+  Plus,
+  Receipt,
 } from "lucide-react";
 import appointmentService from "../../api/services/appointmentService";
 import Button from "../../components/common/Button";
@@ -18,6 +20,7 @@ import Loader from "../../components/common/Loader";
 import StatusBadge from "../../components/common/StatusBadge";
 import { toast } from "react-toastify";
 import labService from "../../api/services/labService";
+import { useAuth } from "../../contexts/useAuth";
 
 const formatDoctorName = (firstName, lastName) => {
   const cleanFirst = String(firstName || "").replace(/^dr\.?\s*/i, "").trim();
@@ -43,9 +46,29 @@ function DetailRow({ icon, label, value }) {
   );
 }
 
+function PatientLink({ patient, onClick }) {
+  if (!patient) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-sm text-primary-600 hover:text-primary-700 font-medium mt-0.5 transition-colors"
+    >
+      {patient.firstName} {patient.lastName} (#{patient.patientId})
+    </button>
+  );
+}
+
 export default function AppointmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const roleName = user?.roleName?.toLowerCase();
+  const isAdmin = roleName === "admin";
+  const isDoctor = roleName === "doctor";
+  const currentDoctorId =
+    user?.doctorId ?? (isDoctor && user?.username === "doctor" ? 1 : null);
   const [appointment, setAppointment] = useState(null);
   const [doctorMap, setDoctorMap] = useState({});
   const [loading, setLoading] = useState(true);
@@ -53,13 +76,25 @@ export default function AppointmentDetail() {
   useEffect(() => {
     appointmentService
       .getById(id)
-      .then(setAppointment)
+      .then((appt) => {
+        if (
+          isDoctor &&
+          !isAdmin &&
+          currentDoctorId &&
+          Number(appt.doctorId) !== Number(currentDoctorId)
+        ) {
+          toast.error("You can only view your own appointments.");
+          navigate("/appointments");
+          return;
+        }
+        setAppointment(appt);
+      })
       .catch(() => {
         toast.error("Failed to load appointment details.");
         navigate("/appointments");
       })
       .finally(() => setLoading(false));
-  }, [id, navigate]);
+  }, [id, navigate, isDoctor, isAdmin, currentDoctorId]);
 
   useEffect(() => {
     labService
@@ -89,19 +124,19 @@ export default function AppointmentDetail() {
 
   const dateFormatted = appointment.appointmentDate
     ? new Date(appointment.appointmentDate).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
     : null;
   const createdOnSource =
     appointment.createdAt || appointment.updatedAt || appointment.appointmentDate;
   const createdOnFormatted = createdOnSource
     ? new Date(createdOnSource).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
     : "Not available";
 
   const statusMap = {
@@ -115,6 +150,13 @@ export default function AppointmentDetail() {
   const doctorName = appointment.doctorId
     ? doctorMap[appointment.doctorId] || `Doctor #${appointment.doctorId}`
     : null;
+  const consultationFee =
+    appointment.consultationFee === null || appointment.consultationFee === undefined
+      ? null
+      : `Rs. ${Number(appointment.consultationFee).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -128,13 +170,27 @@ export default function AppointmentDetail() {
           Back to Appointments
         </button>
 
-        <Button
-          size="sm"
-          onClick={() => navigate(`/appointments/${id}/edit`)}
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-          Edit Appointment
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              navigate("/prescriptions/new", {
+                state: { appointmentId: appointment.appointmentId },
+              })
+            }
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New Prescription
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => navigate(`/appointments/${id}/edit`)}
+          >
+            <Edit3 className="w-3.5 h-3.5" />
+            Edit Appointment
+          </Button>
+        </div>
       </div>
 
       {/* ── Header Card ── */}
@@ -182,9 +238,12 @@ export default function AppointmentDetail() {
             icon={<User className="w-4 h-4 text-primary-500" />}
             label="Patient"
             value={
-              patient
-                ? `${patient.firstName} ${patient.lastName} (#${patient.patientId})`
-                : null
+              patient ? (
+                <PatientLink
+                  patient={patient}
+                  onClick={() => navigate(`/patients/${patient.patientId}`)}
+                />
+              ) : null
             }
           />
           <DetailRow
@@ -206,6 +265,11 @@ export default function AppointmentDetail() {
             icon={<Activity className="w-4 h-4 text-primary-500" />}
             label="Status"
             value={appointment.status}
+          />
+          <DetailRow
+            icon={<Receipt className="w-4 h-4 text-primary-500" />}
+            label="Consultation Fee"
+            value={consultationFee}
           />
           <DetailRow
             icon={<FileText className="w-4 h-4 text-primary-500" />}
