@@ -33,9 +33,7 @@ import PrescriptionDetail from "./pages/Prescription/PrescriptionDetail";
 import BillingList from "./pages/Billing/BillingList";
 import BillingForm from "./pages/Billing/BillingForm";
 import BillingDetail from "./pages/Billing/BillingDetail";
-import DoctorList from "./pages/Doctor/DoctorList";
-import DoctorForm from "./pages/Doctor/DoctorForm";
-import DoctorDetail from "./pages/Doctor/DoctorDetail";
+import Reports from "./pages/Reports/Reports";
 
 function ComingSoon({ name }) {
   return (
@@ -63,6 +61,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/reports" element={<Reports />} />
 
             <Route path="/patients" element={<PatientList />} />
             <Route path="/patients/new" element={<PatientForm />} />
@@ -75,11 +74,10 @@ export default function App() {
               <Route path="/users/:id/edit" element={<UserForm />} />
             </Route>
 
-            
-            <Route path="/doctors" element={<DoctorList />} />
-            <Route path="/doctors/new" element={<DoctorForm />} />
-            <Route path="/doctors/:id" element={<DoctorDetail />} />
-            <Route path="/doctors/:id/edit" element={<DoctorForm />} />
+            <Route
+              path="/doctors"
+              element={<ComingSoon name="Doctor Management" />}
+            />
             <Route path="/appointments" element={<AppointmentList />} />
             <Route path="/appointments/new" element={<AppointmentForm />} />
             <Route path="/appointments/:id" element={<AppointmentDetail />} />

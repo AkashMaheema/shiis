@@ -5,6 +5,7 @@ import Header from "./Header";
 
 const pageTitles = {
   "/": "Dashboard",
+  "/reports": "Reports",
   "/users": "User Management",
   "/users/new": "Create User",
   "/patients": "Patient Management",
