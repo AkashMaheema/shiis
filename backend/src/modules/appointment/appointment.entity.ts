@@ -30,7 +30,16 @@ export class Appointment {
   @Column({ name: 'appointment_time', type: 'varchar', length: 10, nullable: true })
   appointmentTime: string;
 
-  @Column({ name: 'status', type: 'varchar', length: 20, default: 'Scheduled' })
+  @Column({
+    name: 'consultation_fee',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 1000,
+  })
+  consultationFee: number;
+
+  @Column({ name: 'status', type: 'varchar', length: 20, default: "'Scheduled'" })
   status: string;
 
   @Column({ name: 'reason', type: 'varchar', length: 255, nullable: true })
