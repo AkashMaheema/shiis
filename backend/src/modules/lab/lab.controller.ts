@@ -83,6 +83,11 @@ export class LabController {
     return this.labService.findAllRequests(query);
   }
 
+  @Get('requests/pending')
+  getPendingRequests() {
+    return this.labService.getPendingRequests();
+  }
+
   @Get('requests/:id')
   findOneRequest(@Param('id', ParseIntPipe) id: number) {
     return this.labService.findOneRequest(id);

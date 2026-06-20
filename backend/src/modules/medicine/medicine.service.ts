@@ -5,8 +5,8 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Medicine } from './medicine.entity';
 import { MedicineBatch } from './medicine-batch.entity';
 import { Stock } from './stock.entity';
@@ -42,6 +42,9 @@ export class MedicineService {
 
     @InjectRepository(InventoryLog)
     private readonly logRepo: Repository<InventoryLog>,
+
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   // ── Core CRUD ─────────────────────────────────────────────────────────────
@@ -376,5 +379,34 @@ export class MedicineService {
       outOfStock,
       categories: parseInt(categoriesResult?.count ?? '0', 10),
     };
+  }
+
+  async getInventoryRiskReport(
+    lowStockThreshold = 10,
+    expiryDays = 30,
+  ): Promise<any[]> {
+    return this.dataSource.query(`EXEC sp_GetInventoryRiskReport @0, @1`, [
+      lowStockThreshold,
+      expiryDays,
+    ]);
+  }
+
+  async getLowStockMedicines(threshold = 10): Promise<any[]> {
+    return this.dataSource.query(`EXEC sp_GetLowStockMedicines @0`, [
+      threshold,
+    ]);
+  }
+
+  async getExpiringBatches(days = 30): Promise<any[]> {
+    return this.dataSource.query(`EXEC sp_GetExpiringMedicineBatches @0`, [
+      days,
+    ]);
+  }
+
+  async getMedicineMovementHistory(id: number): Promise<any[]> {
+    await this.findOne(id);
+    return this.dataSource.query(`EXEC sp_GetMedicineMovementHistory @0`, [
+      id,
+    ]);
   }
 }

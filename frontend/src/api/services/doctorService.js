@@ -15,6 +15,11 @@ const doctorService = {
 
   getById: (id) => api.get(`${ENDPOINT}/${id}`).then((res) => res.data),
 
+  getSchedule: (id, date) =>
+    api
+      .get(`${ENDPOINT}/${id}/schedule`, { params: date ? { date } : {} })
+      .then((res) => res.data),
+
   create: (data) => api.post(ENDPOINT, data).then((res) => res.data),
 
   update: (id, data) =>
