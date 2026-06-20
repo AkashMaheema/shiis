@@ -30,6 +30,14 @@ export class DoctorController {
     return this.doctorService.findAll(query);
   }
 
+  @Get(':id/schedule')
+  getSchedule(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('date') date?: string,
+  ) {
+    return this.doctorService.getSchedule(id, date);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.doctorService.findOne(id);

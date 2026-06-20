@@ -43,6 +43,32 @@ export class MedicineController {
     return this.medicineService.getStats();
   }
 
+  @Get('inventory-risk')
+  async getInventoryRiskReport(
+    @Query('lowStockThreshold', new ParseIntPipe({ optional: true }))
+    lowStockThreshold = 10,
+    @Query('expiryDays', new ParseIntPipe({ optional: true })) expiryDays = 30,
+  ) {
+    return this.medicineService.getInventoryRiskReport(
+      lowStockThreshold,
+      expiryDays,
+    );
+  }
+
+  @Get('low-stock')
+  async getLowStockMedicines(
+    @Query('threshold', new ParseIntPipe({ optional: true })) threshold = 10,
+  ) {
+    return this.medicineService.getLowStockMedicines(threshold);
+  }
+
+  @Get('expiring-batches')
+  async getExpiringBatches(
+    @Query('days', new ParseIntPipe({ optional: true })) days = 30,
+  ) {
+    return this.medicineService.getExpiringBatches(days);
+  }
+
   // ── Single record ─────────────────────────────────────────────────────────
 
   /**
@@ -67,6 +93,11 @@ export class MedicineController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 20,
   ) {
     return this.medicineService.getInventoryLog(id, page, limit);
+  }
+
+  @Get(':id/movement-history')
+  async getMedicineMovementHistory(@Param('id', ParseIntPipe) id: number) {
+    return this.medicineService.getMedicineMovementHistory(id);
   }
 
   // ── Create ────────────────────────────────────────────────────────────────

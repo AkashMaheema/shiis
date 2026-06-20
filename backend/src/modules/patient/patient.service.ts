@@ -4,8 +4,8 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Patient } from './patient.entity';
 import { PatientAudit, AuditAction } from './patient-audit.entity';
 import { CreatePatientDto } from './dto/create-patient.dto';
@@ -32,6 +32,9 @@ export class PatientService {
 
     @InjectRepository(PatientAudit)
     private readonly auditRepo: Repository<PatientAudit>,
+
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -170,6 +173,17 @@ export class PatientService {
     }
 
     return patient;
+  }
+
+  async searchWithProcedure(searchTerm: string): Promise<any[]> {
+    return this.dataSource.query(`EXEC sp_SearchPatients @0`, [
+      searchTerm?.trim() || '',
+    ]);
+  }
+
+  async getVisitHistory(id: number): Promise<any[]> {
+    await this.findOne(id);
+    return this.dataSource.query(`EXEC sp_GetPatientVisitHistory @0`, [id]);
   }
 
   /**
