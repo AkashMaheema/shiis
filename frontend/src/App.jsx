@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+﻿import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import AdminRoute from "./components/Auth/AdminRoute";
 import DashboardLayout from "./components/Layout/DashboardLayout";
@@ -16,7 +16,27 @@ import LabList from "./pages/Lab/LabList";
 import LabForm from "./pages/Lab/LabForm";
 import LabDetail from "./pages/Lab/LabDetail";
 import LabTestCatalog from "./pages/Lab/LabTestCatalog";
+import SupplierList from "./pages/Supplier/SupplierList";
+import SupplierForm from "./pages/Supplier/SupplierForm";
+import SupplierDetail from "./pages/Supplier/SupplierDetail";
+import StockInList from "./pages/StockIn/StockInList";
+import StockInForm from "./pages/StockIn/StockInForm";
+import StockInDetail from "./pages/StockIn/StockInDetail";
+import StockInReceive from "./pages/StockIn/StockInReceive";
+import MedicineList from "./pages/Medicine/MedicineList";
+import MedicineForm from "./pages/Medicine/MedicineForm";
+import MedicineDetail from "./pages/Medicine/MedicineDetail";
 import { useAuth } from "./contexts/useAuth";
+import PrescriptionList from "./pages/Prescription/PrescriptionList";
+import PrescriptionForm from "./pages/Prescription/PrescriptionForm";
+import PrescriptionDetail from "./pages/Prescription/PrescriptionDetail";
+import BillingList from "./pages/Billing/BillingList";
+import BillingForm from "./pages/Billing/BillingForm";
+import BillingDetail from "./pages/Billing/BillingDetail";
+import DoctorList from "./pages/Doctor/DoctorList";
+import DoctorForm from "./pages/Doctor/DoctorForm";
+import DoctorDetail from "./pages/Doctor/DoctorDetail";
+import Reports from "./pages/Reports/Reports";
 
 function ComingSoon({ name }) {
   return (
@@ -44,6 +64,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/reports" element={<Reports />} />
 
             <Route path="/patients" element={<PatientList />} />
             <Route path="/patients/new" element={<PatientForm />} />
@@ -56,42 +77,38 @@ export default function App() {
               <Route path="/users/:id/edit" element={<UserForm />} />
             </Route>
 
-            <Route
-              path="/doctors"
-              element={<ComingSoon name="Doctor Management" />}
-            />
-            <Route
-              path="/appointments"
-              element={<AppointmentList />}
-            />
-            <Route
-              path="/appointments/new"
-              element={<AppointmentForm />}
-            />
-            <Route
-              path="/appointments/:id"
-              element={<AppointmentDetail />}
-            />
+            <Route path="/doctors" element={<DoctorList />} />
+            <Route path="/doctors/new" element={<DoctorForm />} />
+            <Route path="/doctors/:id" element={<DoctorDetail />} />
+            <Route path="/doctors/:id/edit" element={<DoctorForm />} />
+            <Route path="/appointments" element={<AppointmentList />} />
+            <Route path="/appointments/new" element={<AppointmentForm />} />
+            <Route path="/appointments/:id" element={<AppointmentDetail />} />
             <Route
               path="/appointments/:id/edit"
               element={<AppointmentForm />}
             />
-            <Route
-              path="/prescriptions"
-              element={<ComingSoon name="Prescription System" />}
-            />
-            <Route
-              path="/inventory"
-              element={<ComingSoon name="Inventory & Medicine" />}
-            />
-            <Route
-              path="/suppliers"
-              element={<ComingSoon name="Suppliers & Purchase Orders" />}
-            />
-            <Route
-              path="/billing"
-              element={<ComingSoon name="Billing System" />}
-            />
+            <Route path="/prescriptions" element={<PrescriptionList />} />
+            <Route path="/prescriptions/new" element={<PrescriptionForm />} />
+            <Route path="/prescriptions/:id" element={<PrescriptionDetail />} />
+            <Route path="/prescriptions/:id/edit" element={<PrescriptionForm />} />
+            <Route path="/inventory" element={<MedicineList />} />
+            <Route path="/inventory/new" element={<MedicineForm />} />
+            <Route path="/inventory/:id" element={<MedicineDetail />} />
+            <Route path="/inventory/:id/edit" element={<MedicineForm />} />
+            <Route path="/suppliers" element={<SupplierList />} />
+            <Route path="/suppliers/new" element={<SupplierForm />} />
+            <Route path="/suppliers/:id" element={<SupplierDetail />} />
+            <Route path="/suppliers/:id/edit" element={<SupplierForm />} />
+            <Route path="/stock-in" element={<StockInList />} />
+            <Route path="/stock-in/new" element={<StockInForm />} />
+            <Route path="/stock-in/:id" element={<StockInDetail />} />
+            <Route path="/stock-in/:id/edit" element={<StockInForm />} />
+            <Route path="/stock-in/:id/receive" element={<StockInReceive />} />
+            <Route path="/billing" element={<BillingList />} />
+            <Route path="/billing/new" element={<BillingForm />} />
+            <Route path="/billing/:id" element={<BillingDetail />} />
+            <Route path="/billing/:id/edit" element={<BillingForm />} />
             <Route path="/lab" element={<LabList />} />
             <Route path="/lab/new" element={<LabForm />} />
             <Route path="/lab/tests" element={<LabTestCatalog />} />

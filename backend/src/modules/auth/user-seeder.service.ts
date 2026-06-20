@@ -28,6 +28,10 @@ const DEFAULT_USERS = [
   { username: 'manager01', password: 'Manager@123', roleName: 'Manager' },
 ];
 
+function isHashed(password: string | null): boolean {
+  return typeof password === 'string' && /^\$2[ab]\$/.test(password);
+}
+
 @Injectable()
 export class UserSeederService implements OnModuleInit {
   private readonly logger = new Logger(UserSeederService.name);
@@ -41,31 +45,27 @@ export class UserSeederService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    const existingUsersCount = await this.userRepository.count();
+    try {
+      const existingUsersCount = await this.userRepository.count();
 
-    if (existingUsersCount > 0) {
-      this.logger.log(
-        `User seeding skipped: found ${existingUsersCount} existing user(s)`,
+      if (existingUsersCount === 0) {
+        await this.seedRolesIfMissing();
+        await this.seedDefaultUsers();
+      } else {
+        await this.rehashPlainPasswords();
+      }
+    } catch (err: any) {
+      this.logger.warn(
+        `Failed to seed users (tables might not exist yet): ${
+          err.message || err
+        }`,
       );
-      return;
     }
-
-    await this.seedRolesIfMissing();
-    await this.seedDefaultUsers();
   }
 
   private async seedRolesIfMissing(): Promise<void> {
     for (const defaultUser of DEFAULT_USERS) {
-      const existingRole = await this.roleRepository
-        .createQueryBuilder('role')
-        .where('LOWER(role.roleName) = LOWER(:roleName)', {
-          roleName: defaultUser.roleName,
-        })
-        .orWhere('LOWER(role.role_name) = LOWER(:roleName)', {
-          roleName: defaultUser.roleName,
-        })
-        .getOne()
-        .catch(() => null);
+      const existingRole = await this.findRoleByName(defaultUser.roleName);
 
       if (existingRole) continue;
 
@@ -103,6 +103,40 @@ export class UserSeederService implements OnModuleInit {
       await this.userRepository.save(user);
       this.logger.log(`Seeded default user: ${defaultUser.username}`);
     }
+  }
+
+  private async rehashPlainPasswords(): Promise<void> {
+    const allUsers = await this.userRepository.find();
+    const toUpdate: UserEntity[] = [];
+
+    for (const user of allUsers) {
+      if (isHashed(user.password)) continue;
+
+      const defaultUser = DEFAULT_USERS.find(
+        (item) => item.username === user.username,
+      );
+
+      if (defaultUser) {
+        user.password = await bcrypt.hash(defaultUser.password, SALT_ROUNDS);
+      } else if (user.password) {
+        this.logger.warn(
+          `User "${user.username}" has a plain-text password; re-hashing`,
+        );
+        user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
+      } else {
+        continue;
+      }
+
+      toUpdate.push(user);
+    }
+
+    if (toUpdate.length === 0) {
+      this.logger.log('All user passwords are already hashed');
+      return;
+    }
+
+    await this.userRepository.save(toUpdate);
+    this.logger.log(`Re-hashed passwords for ${toUpdate.length} user(s)`);
   }
 
   private async findRoleByName(roleName: string): Promise<RoleEntity | null> {
