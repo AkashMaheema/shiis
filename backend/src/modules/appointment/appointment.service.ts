@@ -95,6 +95,49 @@ export class AppointmentService {
     return Object.keys(diff).length > 0 ? diff : null;
   }
 
+  private async attachDoctorDetails(appointments: Appointment[]): Promise<any[]> {
+    const doctorIds = [
+      ...new Set(
+        appointments
+          .map((appointment) => Number(appointment.doctorId))
+          .filter((id) => Number.isFinite(id)),
+      ),
+    ];
+
+    if (doctorIds.length === 0) return appointments;
+
+    const placeholders = doctorIds.map((_, index) => `@${index}`).join(',');
+    const doctors: any[] = await this.appointmentRepo.manager.query(
+      `SELECT doctor_id AS doctorId, first_name AS firstName, last_name AS lastName
+         FROM [Doctor]
+        WHERE doctor_id IN (${placeholders})`,
+      doctorIds,
+    );
+    const doctorMap = new Map(
+      doctors.map((doctor) => [
+        Number(doctor.doctorId),
+        {
+          doctorId: Number(doctor.doctorId),
+          firstName: doctor.firstName,
+          lastName: doctor.lastName,
+        },
+      ]),
+    );
+
+    return appointments.map((appointment) => {
+      const doctor = doctorMap.get(Number(appointment.doctorId)) ?? null;
+      const doctorName = doctor
+        ? `${doctor.firstName ?? ''} ${doctor.lastName ?? ''}`.trim()
+        : null;
+
+      return {
+        ...appointment,
+        doctor,
+        doctorName,
+      };
+    });
+  }
+
   /** Write a row to AppointmentAudit. Never throws — audit failures are logged only. */
   private async writeAudit(
     appointmentId: number,
@@ -190,7 +233,8 @@ export class AppointmentService {
       `findAll → ${data.length}/${total} appointments (page ${page}, limit ${limit})`,
     );
 
-    return PaginatedResponse.of(data, total, page, limit);
+    const enrichedData = await this.attachDoctorDetails(data);
+    return PaginatedResponse.of(enrichedData, total, page, limit);
   }
 
   /**
