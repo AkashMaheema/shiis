@@ -19,10 +19,18 @@ const patientService = {
   search: (query) =>
     api.get(ENDPOINT, { params: { search: query } }).then((res) => res.data),
 
+  procedureSearch: (query) =>
+    api
+      .get(`${ENDPOINT}/search/procedure`, { params: { q: query } })
+      .then((res) => res.data),
+
   /**
    * Get single patient by ID
    */
   getById: (id) => api.get(`${ENDPOINT}/${id}`).then((res) => res.data),
+
+  getVisitHistory: (id) =>
+    api.get(`${ENDPOINT}/${id}/visit-history`).then((res) => res.data),
 
   /**
    * Create a new patient

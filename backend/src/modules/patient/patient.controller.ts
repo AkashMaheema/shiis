@@ -54,11 +54,21 @@ export class PatientController {
     return this.patientService.getStats();
   }
 
+  @Get('search/procedure')
+  async searchWithProcedure(@Query('q') query = '') {
+    return this.patientService.searchWithProcedure(query);
+  }
+
   // ── Single record ─────────────────────────────────────────────────────────
 
   /**
    * GET /api/patients/:id
    */
+  @Get(':id/visit-history')
+  async getVisitHistory(@Param('id', ParseIntPipe) id: number) {
+    return this.patientService.getVisitHistory(id);
+  }
+
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.patientService.findOne(id);

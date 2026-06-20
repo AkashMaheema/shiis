@@ -291,6 +291,20 @@ export class BillingService {
     return rows[0] ?? {};
   }
 
+  async getClinicalOperationsSummary(
+    fromDate?: string,
+    toDate?: string,
+  ): Promise<any[]> {
+    return this.dataSource.query(
+      `EXEC sp_GetClinicalOperationsSummary @0, @1`,
+      [fromDate || null, toDate || null],
+    );
+  }
+
+  async getUnpaidBills(): Promise<any[]> {
+    return this.dataSource.query(`EXEC sp_GetUnpaidBills`);
+  }
+
   async listPatients(): Promise<any[]> {
     const rows: any[] = await this.dataSource.query(
       `SELECT patient_id AS patientId, first_name AS firstName, last_name AS lastName, phone

@@ -114,6 +114,15 @@ export class DoctorService {
     return this.toResponse(doctor);
   }
 
+  async getSchedule(id: number, date?: string) {
+    await this.findOne(id);
+    const scheduleDate = date || new Date().toISOString().slice(0, 10);
+    return this.dataSource.query(`EXEC sp_GetDoctorSchedule @0, @1`, [
+      id,
+      scheduleDate,
+    ]);
+  }
+
   private async assertUniqueUsername(username: string, excludeUserId?: number) {
     const qb = this.userRepo
       .createQueryBuilder('u')

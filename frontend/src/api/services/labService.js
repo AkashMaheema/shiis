@@ -36,6 +36,8 @@ const labService = {
         },
       })
       .then((r) => r.data),
+  getPendingRequests: () =>
+    api.get(`${ROOT}/requests/pending`).then((r) => r.data),
   getRequest: (id) => api.get(`${ROOT}/requests/${id}`).then((r) => r.data),
   createRequest: (data) =>
     api.post(`${ROOT}/requests`, data).then((r) => r.data),

@@ -4,8 +4,8 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Appointment } from './appointment.entity';
 import { AppointmentAudit, AuditAction } from './appointment-audit.entity';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
@@ -55,6 +55,9 @@ export class AppointmentService {
 
     @InjectRepository(AppointmentAudit)
     private readonly auditRepo: Repository<AppointmentAudit>,
+
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) { }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -410,5 +413,24 @@ export class AppointmentService {
     ]);
 
     return { total, scheduled, completed, cancelled, todayCount };
+  }
+
+  async getDailySummary(date?: string): Promise<any> {
+    const summaryDate = date || new Date().toISOString().slice(0, 10);
+    const rows: any[] = await this.dataSource.query(
+      `EXEC sp_GetDailyAppointmentsSummary @0`,
+      [summaryDate],
+    );
+    return rows[0] ?? {};
+  }
+
+  async getDoctorWorkloadSummary(
+    fromDate?: string,
+    toDate?: string,
+  ): Promise<any[]> {
+    return this.dataSource.query(`EXEC sp_GetDoctorWorkloadSummary @0, @1`, [
+      fromDate || null,
+      toDate || null,
+    ]);
   }
 }

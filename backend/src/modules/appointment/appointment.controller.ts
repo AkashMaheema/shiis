@@ -54,6 +54,19 @@ export class AppointmentController {
     return this.appointmentService.getStats();
   }
 
+  @Get('summary/daily')
+  async getDailySummary(@Query('date') date?: string) {
+    return this.appointmentService.getDailySummary(date);
+  }
+
+  @Get('summary/doctor-workload')
+  async getDoctorWorkloadSummary(
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    return this.appointmentService.getDoctorWorkloadSummary(fromDate, toDate);
+  }
+
   // ── Single record ─────────────────────────────────────────────────────────
 
   /**
