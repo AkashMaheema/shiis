@@ -350,6 +350,10 @@ export class LabService {
 
   // ───────────────────────────── Stats ──────────────────────────────────────
 
+  async getPendingRequests(): Promise<any[]> {
+    return this.dataSource.query(`EXEC sp_GetPendingLabRequests`);
+  }
+
   async getStats(): Promise<{
     totalTests: number;
     totalRequests: number;

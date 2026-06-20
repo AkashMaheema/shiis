@@ -36,6 +36,19 @@ export class BillingController {
     return this.billingService.getStats();
   }
 
+  @Get('clinical-summary')
+  getClinicalOperationsSummary(
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    return this.billingService.getClinicalOperationsSummary(fromDate, toDate);
+  }
+
+  @Get('unpaid')
+  getUnpaidBills() {
+    return this.billingService.getUnpaidBills();
+  }
+
   @Get('patients')
   listPatients() {
     return this.billingService.listPatients();

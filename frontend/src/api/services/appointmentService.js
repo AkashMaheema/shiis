@@ -50,6 +50,16 @@ const appointmentService = {
    * Get appointment aggregate stats for the dashboard
    */
   getStats: () => api.get(`${ENDPOINT}/stats`).then((res) => res.data),
+
+  getDailySummary: (date) =>
+    api
+      .get(`${ENDPOINT}/summary/daily`, { params: date ? { date } : {} })
+      .then((res) => res.data),
+
+  getDoctorWorkloadSummary: (params = {}) =>
+    api
+      .get(`${ENDPOINT}/summary/doctor-workload`, { params })
+      .then((res) => res.data),
 };
 
 export default appointmentService;

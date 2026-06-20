@@ -30,6 +30,22 @@ const medicineService = {
   getStats: () => api.get(`${ENDPOINT}/stats`).then((res) => res.data),
 
   /**
+   * Get database-side inventory risk report
+   */
+  getInventoryRiskReport: (params = {}) =>
+    api.get(`${ENDPOINT}/inventory-risk`, { params }).then((res) => res.data),
+
+  getLowStockMedicines: (threshold = 10) =>
+    api
+      .get(`${ENDPOINT}/low-stock`, { params: { threshold } })
+      .then((res) => res.data),
+
+  getExpiringBatches: (days = 30) =>
+    api
+      .get(`${ENDPOINT}/expiring-batches`, { params: { days } })
+      .then((res) => res.data),
+
+  /**
    * Create a new medicine
    */
   create: (data) => api.post(ENDPOINT, data).then((res) => res.data),
@@ -58,6 +74,9 @@ const medicineService = {
     api
       .get(`${ENDPOINT}/${id}/log`, { params: { page, limit } })
       .then((res) => res.data),
+
+  getMovementHistory: (id) =>
+    api.get(`${ENDPOINT}/${id}/movement-history`).then((res) => res.data),
 };
 
 export default medicineService;
